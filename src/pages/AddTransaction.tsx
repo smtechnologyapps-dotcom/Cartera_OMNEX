@@ -40,8 +40,13 @@ const AddTransaction: React.FC = () => {
       html5QrCodeRef.current = html5QrCode;
       
       html5QrCode.start(
-        { facingMode: "environment" }, // prefer back camera
-        { fps: 10, qrbox: { width: 250, height: 250 } },
+        { 
+          facingMode: "environment",
+          advanced: [{ focusMode: "continuous" }] as any,
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        },
+        { fps: 10 }, // Sin qrbox para usar la pantalla completa
         onScanSuccess,
         onScanFailure
       ).catch(err => {
@@ -67,7 +72,7 @@ const AddTransaction: React.FC = () => {
     };
   }, [isScanningQRCode]);
 
-  const onScanSuccess = async (decodedText: string, decodedResult: any) => {
+  const onScanSuccess = async (decodedText: string) => {
     if (html5QrCodeRef.current) {
       await html5QrCodeRef.current.stop().catch(e => console.error(e));
       html5QrCodeRef.current.clear();
@@ -112,7 +117,7 @@ const AddTransaction: React.FC = () => {
     }
   };
 
-  const onScanFailure = (error: any) => {
+  const onScanFailure = () => {
     // Ignorar errores de escaneo continuos
   };
 
