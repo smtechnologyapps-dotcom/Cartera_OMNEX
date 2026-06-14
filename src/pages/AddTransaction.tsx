@@ -166,39 +166,37 @@ const AddTransaction: React.FC = () => {
         merchantName = lines[targetIndex + 1].replace(/[^a-zA-Z\s]/g, '').trim(); // Limpiar caracteres raros
       }
 
-      // 2. Extraer monto (Priorizar valores con signo $)
-      const dollarRegex = /\$\s*(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{1,2})?)/g;
-      let dollarMatch;
-      let dollarAmounts: number[] = [];
-      while ((dollarMatch = dollarRegex.exec(text)) !== null) {
-         let valStr = dollarMatch[1].replace(/[^0-9.,]/g, '');
+      // 2. Extraer monto (Buscar patrones que parezcan dinero: con 2 decimales y/o símbolo $)
+      // Tesseract a veces confunde $ con S o 5.
+      const moneyRegex = /(?:[\$S5])?\s*(\d{1,3}(?:[.,]\d{3})*[.,]\d{2})/g;
+      let match;
+      let possibleAmounts: number[] = [];
+      
+      while ((match = moneyRegex.exec(text)) !== null) {
+         let valStr = match[1].replace(/[^0-9.,]/g, '');
          if (valStr.includes(',') && valStr.includes('.')) valStr = valStr.replace(/,/g, '');
          else if (valStr.includes(',')) valStr = valStr.replace(',', '.');
          const val = parseFloat(valStr);
-         if (!isNaN(val) && val > 0) dollarAmounts.push(val);
+         if (!isNaN(val) && val > 0 && val < 50000) { 
+            possibleAmounts.push(val);
+         }
       }
 
-      if (dollarAmounts.length > 0) {
-         // Si hay montos con $, usualmente el más grande es el total (si hay subtotal y total)
-         finalAmount = Math.max(...dollarAmounts);
-      } else {
-         // Fallback: buscar cualquier número (lógica anterior)
-         const regex = /(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{1,2})?)/g;
-         let match;
-         let possibleAmounts: number[] = [];
-         while ((match = regex.exec(text)) !== null) {
-            let valStr = match[1].replace(/[^0-9.,]/g, '');
-            if (valStr.includes(',') && valStr.includes('.')) valStr = valStr.replace(/,/g, '');
-            else if (valStr.includes(',')) valStr = valStr.replace(',', '.');
-            const val = parseFloat(valStr);
-            if (!isNaN(val) && val > 0 && val < 50000) { 
-                if (val.toString().length >= 8 && !valStr.includes('.')) continue; // ignorar teléfonos/confirmaciones
+      // Si no encuentra con 2 decimales, busca cualquier número con $ o S adelante
+      if (possibleAmounts.length === 0) {
+          const fallbackRegex = /(?:[\$S])\s*(\d{1,3}(?:[.,]\d{3})*)/g;
+          while ((match = fallbackRegex.exec(text)) !== null) {
+             let valStr = match[1].replace(/[^0-9.,]/g, '');
+             const val = parseFloat(valStr);
+             if (!isNaN(val) && val > 0 && val < 50000) { 
                 possibleAmounts.push(val);
-            }
-         }
-         if (possibleAmounts.length > 0) {
-            finalAmount = Math.max(...possibleAmounts);
-         }
+             }
+          }
+      }
+
+      if (possibleAmounts.length > 0) {
+         // Si hay varios montos (ej. subtotal y total), solemos querer el mayor
+         finalAmount = Math.max(...possibleAmounts);
       }
 
       if (finalAmount > 0) {
