@@ -156,43 +156,60 @@ const AddTransaction: React.FC = () => {
       const text = result.data.text;
       console.log("Texto extraído:", text); // Para debug en consola
       
-      // Regex más inteligente para capturar formatos con o sin $, con o sin decimales.
-      // Ej: $25.00, $ 25.00, 25, 25.50
-      const regex = /(?:\$)?\s*(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{1,2})?)/g;
-      
-      let match;
-      let possibleAmounts: number[] = [];
-      
-      while ((match = regex.exec(text)) !== null) {
-         let valStr = match[1];
-         // Limpiar el string
-         valStr = valStr.replace(/[^0-9.,]/g, '');
-         // Si tiene coma y punto, asumimos que el punto es decimal y la coma separador de miles
-         if (valStr.includes(',') && valStr.includes('.')) {
-             valStr = valStr.replace(/,/g, '');
-         } else if (valStr.includes(',')) {
-             // Si solo tiene coma, asumimos que es el decimal
-             valStr = valStr.replace(',', '.');
-         }
+      let finalAmount = 0;
+      let merchantName = '';
+
+      // 1. Intentar extraer nombre (Yappy: "Enviado a" o "Recibido de")
+      const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+      const targetIndex = lines.findIndex(l => l.toLowerCase().includes('enviado a') || l.toLowerCase().includes('recibido de'));
+      if (targetIndex !== -1 && lines.length > targetIndex + 1) {
+        merchantName = lines[targetIndex + 1].replace(/[^a-zA-Z\s]/g, '').trim(); // Limpiar caracteres raros
+      }
+
+      // 2. Extraer monto (Priorizar valores con signo $)
+      const dollarRegex = /\$\s*(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{1,2})?)/g;
+      let dollarMatch;
+      let dollarAmounts: number[] = [];
+      while ((dollarMatch = dollarRegex.exec(text)) !== null) {
+         let valStr = dollarMatch[1].replace(/[^0-9.,]/g, '');
+         if (valStr.includes(',') && valStr.includes('.')) valStr = valStr.replace(/,/g, '');
+         else if (valStr.includes(',')) valStr = valStr.replace(',', '.');
          const val = parseFloat(valStr);
-         // Filtramos valores 0, o números gigantes (como números de teléfono que Yappy a veces muestra)
-         // Un pago de yappy rara vez excede 10,000, y los teléfonos en Panamá no tienen punto decimal.
-         if (!isNaN(val) && val > 0 && val < 50000) { 
-             // Penalizar números enteros que parecen teléfonos (8 dígitos en Panamá, ej 61234567)
-             if (val.toString().length === 8 && !valStr.includes('.')) continue;
-             
-             possibleAmounts.push(val);
+         if (!isNaN(val) && val > 0) dollarAmounts.push(val);
+      }
+
+      if (dollarAmounts.length > 0) {
+         // Si hay montos con $, usualmente el más grande es el total (si hay subtotal y total)
+         finalAmount = Math.max(...dollarAmounts);
+      } else {
+         // Fallback: buscar cualquier número (lógica anterior)
+         const regex = /(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{1,2})?)/g;
+         let match;
+         let possibleAmounts: number[] = [];
+         while ((match = regex.exec(text)) !== null) {
+            let valStr = match[1].replace(/[^0-9.,]/g, '');
+            if (valStr.includes(',') && valStr.includes('.')) valStr = valStr.replace(/,/g, '');
+            else if (valStr.includes(',')) valStr = valStr.replace(',', '.');
+            const val = parseFloat(valStr);
+            if (!isNaN(val) && val > 0 && val < 50000) { 
+                if (val.toString().length >= 8 && !valStr.includes('.')) continue; // ignorar teléfonos/confirmaciones
+                possibleAmounts.push(val);
+            }
+         }
+         if (possibleAmounts.length > 0) {
+            finalAmount = Math.max(...possibleAmounts);
          }
       }
 
-      if (possibleAmounts.length > 0) {
-        // En un recibo el Total suele ser el número más grande, excepto si hay un balance previo.
-        // Pero como es un comprobante de pago, el mayor número suele ser el monto pagado.
-        const maxAmount = Math.max(...possibleAmounts);
-        setFormData(prev => ({ ...prev, amount: maxAmount.toString() }));
-        setScanResult('¡Monto detectado! Por favor, verifica que sea correcto.');
+      if (finalAmount > 0) {
+        setFormData(prev => ({ 
+          ...prev, 
+          amount: finalAmount.toString(),
+          description: merchantName || prev.description
+        }));
+        setScanResult(merchantName ? '¡Monto y contacto detectados!' : '¡Monto detectado! Verifica los datos.');
       } else {
-        setScanResult('No se detectó un monto claro. Revisa la imagen o ingrésalo manualmente.');
+        setScanResult('No se detectó un monto claro. Revisa la imagen.');
       }
     } catch (error) {
       console.error("OCR Error", error);
