@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { addTransaction, uploadInvoice } from '../services/db';
 import type { Transaction } from '../services/db';
 import Tesseract from 'tesseract.js';
-import { Html5Qrcode } from 'html5-qrcode';
+import { Scanner } from '@yudiel/react-qr-scanner';
 import { motion } from 'framer-motion';
 import { Camera, Upload, Loader2, CheckCircle2, QrCode, X } from 'lucide-react';
 
@@ -32,52 +32,8 @@ const AddTransaction: React.FC = () => {
   const [scanResult, setScanResult] = useState<string>('');
   
   const [isScanningQRCode, setIsScanningQRCode] = useState(false);
-  const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
-
-  React.useEffect(() => {
-    if (isScanningQRCode) {
-      const html5QrCode = new Html5Qrcode("qr-reader");
-      html5QrCodeRef.current = html5QrCode;
-      
-      html5QrCode.start(
-        { 
-          facingMode: "environment",
-          advanced: [{ focusMode: "continuous" }] as any,
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
-        },
-        { fps: 10 }, // Sin qrbox para usar la pantalla completa
-        onScanSuccess,
-        onScanFailure
-      ).catch(err => {
-        console.error("Error starting camera", err);
-        setScanResult("Error al iniciar cámara. Asegúrate de dar permisos.");
-      });
-    } else {
-      if (html5QrCodeRef.current) {
-        html5QrCodeRef.current.stop().then(() => {
-          html5QrCodeRef.current?.clear();
-          html5QrCodeRef.current = null;
-        }).catch(e => console.error("Failed to stop scanner", e));
-      }
-    }
-
-    return () => {
-      if (html5QrCodeRef.current) {
-        html5QrCodeRef.current.stop().then(() => {
-          html5QrCodeRef.current?.clear();
-          html5QrCodeRef.current = null;
-        }).catch(e => console.error("Failed to clear scanner on unmount", e));
-      }
-    };
-  }, [isScanningQRCode]);
 
   const onScanSuccess = async (decodedText: string) => {
-    if (html5QrCodeRef.current) {
-      await html5QrCodeRef.current.stop().catch(e => console.error(e));
-      html5QrCodeRef.current.clear();
-      html5QrCodeRef.current = null;
-    }
     setIsScanningQRCode(false);
     setScanResult('QR detectado. Obteniendo datos de la DGI...');
     setIsScanning(true);
@@ -117,9 +73,7 @@ const AddTransaction: React.FC = () => {
     }
   };
 
-  const onScanFailure = () => {
-    // Ignorar errores de escaneo continuos
-  };
+
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -461,7 +415,15 @@ const AddTransaction: React.FC = () => {
                 <X size={24} />
               </button>
             </div>
-            <div id="qr-reader" style={{ width: '100%', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}></div>
+            <div style={{ width: '100%', borderRadius: 'var(--radius-md)', overflow: 'hidden', background: '#000' }}>
+               <Scanner 
+                 onScan={(result) => {
+                   if (result && result.length > 0) {
+                     onScanSuccess(result[0].rawValue);
+                   }
+                 }} 
+               />
+            </div>
             <p style={{ textAlign: 'center', marginTop: '1rem', fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>Apunta la cámara al código QR de la factura impresa.</p>
           </div>
         </div>
