@@ -7,6 +7,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import AddTransaction from './pages/AddTransaction';
 import TransactionsList from './pages/TransactionsList';
+import AuditLogs from './pages/AuditLogs';
 
 const App: React.FC = () => {
   return (
@@ -19,6 +20,7 @@ const App: React.FC = () => {
             <Route path="/" element={<Dashboard />} />
             <Route path="/add" element={<AddTransaction />} />
             <Route path="/transactions" element={<TransactionsList />} />
+            <Route path="/audit" element={<AuditLogs />} />
           </Route>
         </Routes>
       </Router>

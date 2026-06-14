@@ -3,11 +3,13 @@ import { useAuth } from '../contexts/AuthContext';
 import { getUserTransactions } from '../services/db';
 import type { Transaction } from '../services/db';
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, DollarSign, Briefcase } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, Briefcase, ChevronRight, Award } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 const Dashboard: React.FC = () => {
   const { currentUser } = useAuth();
+  const navigate = useNavigate();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -35,6 +37,17 @@ const Dashboard: React.FC = () => {
   const omnexExpense = transactions.filter(t => t.type === 'gasto' && t.category === 'OMNEX').reduce((acc, t) => acc + t.amount, 0);
   const personalExpense = transactions.filter(t => t.type === 'gasto' && t.category === 'Personal/Hijos').reduce((acc, t) => acc + t.amount, 0);
   const balance = totalIncome - totalExpense;
+
+  // Calculate Top 5 Expenses for the current month
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+  const topExpenses = transactions
+    .filter(t => {
+      const d = t.date instanceof Date ? t.date : t.date.toDate();
+      return t.type === 'gasto' && d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+    })
+    .sort((a, b) => b.amount - a.amount)
+    .slice(0, 5);
 
   // Chart Data preparation
   // Group by date (simplistic approach)
@@ -73,7 +86,11 @@ const Dashboard: React.FC = () => {
 
       {/* KPI Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
-        <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div 
+          className="glass-panel hover:bg-white/5 transition-colors cursor-pointer" 
+          style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', position: 'relative' }}
+          onClick={() => navigate('/transactions?filter=all')}
+        >
           <div style={{ background: 'rgba(59, 130, 246, 0.2)', padding: '1rem', borderRadius: '50%', color: 'var(--color-primary)' }}>
             <DollarSign size={24} />
           </div>
@@ -81,9 +98,14 @@ const Dashboard: React.FC = () => {
             <p style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>Balance Total</p>
             <h3 style={{ fontSize: '1.5rem', fontWeight: 700 }}>${balance.toFixed(2)}</h3>
           </div>
+          <ChevronRight size={16} className="text-text-muted absolute right-4 top-1/2 -translate-y-1/2" />
         </div>
 
-        <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div 
+          className="glass-panel hover:bg-white/5 transition-colors cursor-pointer" 
+          style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', position: 'relative' }}
+          onClick={() => navigate('/transactions?filter=ingreso')}
+        >
           <div style={{ background: 'rgba(16, 185, 129, 0.2)', padding: '1rem', borderRadius: '50%', color: 'var(--color-success)' }}>
             <TrendingUp size={24} />
           </div>
@@ -91,9 +113,14 @@ const Dashboard: React.FC = () => {
             <p style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>Ingresos</p>
             <h3 style={{ fontSize: '1.5rem', fontWeight: 700 }}>${totalIncome.toFixed(2)}</h3>
           </div>
+          <ChevronRight size={16} className="text-text-muted absolute right-4 top-1/2 -translate-y-1/2" />
         </div>
 
-        <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div 
+          className="glass-panel hover:bg-white/5 transition-colors cursor-pointer" 
+          style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', position: 'relative' }}
+          onClick={() => navigate('/transactions?filter=OMNEX')}
+        >
           <div style={{ background: 'rgba(139, 92, 246, 0.2)', padding: '1rem', borderRadius: '50%', color: 'var(--color-accent-omnex)' }}>
             <Briefcase size={24} />
           </div>
@@ -101,9 +128,14 @@ const Dashboard: React.FC = () => {
             <p style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>Gastos OMNEX</p>
             <h3 style={{ fontSize: '1.5rem', fontWeight: 700 }}>${omnexExpense.toFixed(2)}</h3>
           </div>
+          <ChevronRight size={16} className="text-text-muted absolute right-4 top-1/2 -translate-y-1/2" />
         </div>
 
-        <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div 
+          className="glass-panel hover:bg-white/5 transition-colors cursor-pointer" 
+          style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', position: 'relative' }}
+          onClick={() => navigate('/transactions?filter=Personal/Hijos')}
+        >
           <div style={{ background: 'rgba(236, 72, 153, 0.2)', padding: '1rem', borderRadius: '50%', color: 'var(--color-accent-personal)' }}>
             <TrendingDown size={24} />
           </div>
@@ -111,6 +143,7 @@ const Dashboard: React.FC = () => {
             <p style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>Gastos Personales</p>
             <h3 style={{ fontSize: '1.5rem', fontWeight: 700 }}>${personalExpense.toFixed(2)}</h3>
           </div>
+          <ChevronRight size={16} className="text-text-muted absolute right-4 top-1/2 -translate-y-1/2" />
         </div>
       </div>
 
@@ -182,6 +215,38 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Top 5 Expenses Ranking */}
+      <div className="glass-panel mt-8 p-6">
+        <h3 className="mb-4 font-bold flex items-center gap-2 text-lg">
+          <Award className="text-yellow-500" /> Top 5 Gastos del Mes
+        </h3>
+        
+        {topExpenses.length > 0 ? (
+          <div className="space-y-3">
+            {topExpenses.map((tx, idx) => (
+              <div key={tx.id} className="flex justify-between items-center p-3 bg-white/5 rounded-lg border border-white/5">
+                <div className="flex items-center gap-4">
+                  <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center font-bold text-sm">
+                    #{idx + 1}
+                  </div>
+                  <div>
+                    <p className="font-semibold">{tx.description}</p>
+                    <p className="text-xs text-text-muted">
+                      {tx.category} {tx.subCategory ? `• ${tx.subCategory}` : ''}
+                    </p>
+                  </div>
+                </div>
+                <div className="font-bold text-red-400">
+                  ${tx.amount.toFixed(2)}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-text-muted text-center py-4">Aún no hay gastos registrados este mes.</p>
+        )}
       </div>
 
     </motion.div>

@@ -12,28 +12,60 @@ export interface Transaction {
   date: Timestamp | Date;
   description: string;
   invoiceUrl?: string;
+  status?: 'active' | 'deleted';
+  updatedAt?: Timestamp | Date;
+}
+
+export interface AuditLog {
+  id?: string;
+  userId: string;
+  transactionId: string;
+  action: 'CREATE' | 'UPDATE' | 'DELETE';
+  reason?: string;
+  timestamp: Timestamp | Date;
+  details?: any;
 }
 
 let mockTransactions: Transaction[] = [
-  { id: '1', userId: 'demo-user-123', type: 'ingreso', category: 'Ingreso', subCategory: 'Plataformas digitales', amount: 5000, date: new Date(Date.now() - 86400000 * 5), description: 'Ventas de la semana' },
-  { id: '2', userId: 'demo-user-123', type: 'gasto', category: 'OMNEX', subCategory: 'Plataforma digital', amount: 350, date: new Date(Date.now() - 86400000 * 2), description: 'Suscripción de software' },
-  { id: '3', userId: 'demo-user-123', type: 'gasto', category: 'Personal/Hijos', subCategory: 'Útiles escolares', amount: 120, date: new Date(), description: 'Compra de útiles escolares' },
+  { id: '1', userId: 'demo-user-123', type: 'ingreso', category: 'Ingreso', subCategory: 'Plataformas digitales', amount: 5000, date: new Date(Date.now() - 86400000 * 5), description: 'Ventas de la semana', status: 'active' },
+  { id: '2', userId: 'demo-user-123', type: 'gasto', category: 'OMNEX', subCategory: 'Plataforma digital', amount: 350, date: new Date(Date.now() - 86400000 * 2), description: 'Suscripción de software', status: 'active' },
+  { id: '3', userId: 'demo-user-123', type: 'gasto', category: 'Personal/Hijos', subCategory: 'Útiles escolares', amount: 120, date: new Date(), description: 'Compra de útiles escolares', status: 'active' },
 ];
 
+let mockAuditLogs: AuditLog[] = [];
+
 const getTransactionsCollection = () => collection(db, 'transactions');
+const getAuditCollection = () => collection(db, 'audit_logs');
+
+export const logAudit = async (log: AuditLog) => {
+  if (isDemoMode) {
+    mockAuditLogs = [{ ...log, id: Date.now().toString() }, ...mockAuditLogs];
+    return;
+  }
+  try {
+    await addDoc(getAuditCollection(), {
+      ...log,
+      timestamp: log.timestamp instanceof Date ? Timestamp.fromDate(log.timestamp) : log.timestamp
+    });
+  } catch (error) {
+    console.error("Error logging audit: ", error);
+  }
+};
 
 export const addTransaction = async (transaction: Transaction) => {
+  const tx = { ...transaction, status: 'active' as const };
   if (isDemoMode) {
-    console.warn("Modo Demo: Guardando transacción en memoria...");
-    const newTx = { ...transaction, id: Date.now().toString() };
+    const newTx = { ...tx, id: Date.now().toString() };
     mockTransactions = [newTx, ...mockTransactions];
+    await logAudit({ userId: tx.userId, transactionId: newTx.id, action: 'CREATE', timestamp: new Date(), details: tx });
     return newTx.id;
   }
   try {
     const docRef = await addDoc(getTransactionsCollection(), {
-      ...transaction,
-      date: transaction.date instanceof Date ? Timestamp.fromDate(transaction.date) : transaction.date
+      ...tx,
+      date: tx.date instanceof Date ? Timestamp.fromDate(tx.date) : tx.date
     });
+    await logAudit({ userId: tx.userId, transactionId: docRef.id, action: 'CREATE', timestamp: new Date(), details: tx });
     return docRef.id;
   } catch (error) {
     console.error("Error adding document: ", error);
@@ -41,15 +73,40 @@ export const addTransaction = async (transaction: Transaction) => {
   }
 };
 
+export const updateTransaction = async (id: string, updates: Partial<Transaction>, userId: string, reason: string = 'Edición manual') => {
+  if (isDemoMode) {
+    mockTransactions = mockTransactions.map(tx => tx.id === id ? { ...tx, ...updates, updatedAt: new Date() } : tx);
+    await logAudit({ userId, transactionId: id, action: 'UPDATE', reason, timestamp: new Date(), details: updates });
+    return;
+  }
+  try {
+    const { doc, updateDoc } = await import('firebase/firestore');
+    const docRef = doc(db, 'transactions', id);
+    const safeUpdates = { ...updates, updatedAt: Timestamp.now() };
+    if (safeUpdates.date && safeUpdates.date instanceof Date) {
+      safeUpdates.date = Timestamp.fromDate(safeUpdates.date);
+    }
+    await updateDoc(docRef, safeUpdates);
+    await logAudit({ userId, transactionId: id, action: 'UPDATE', reason, timestamp: new Date(), details: updates });
+  } catch (error) {
+    console.error("Error updating document: ", error);
+    throw error;
+  }
+};
+
+export const softDeleteTransaction = async (id: string, userId: string, reason: string) => {
+  return updateTransaction(id, { status: 'deleted' }, userId, reason);
+};
+
 export const getUserTransactions = async (userId: string) => {
   if (isDemoMode) {
-    console.warn("Modo Demo: Obteniendo transacciones de memoria...");
-    return [...mockTransactions];
+    return [...mockTransactions.filter(t => t.status !== 'deleted')];
   }
   try {
     const q = query(
       getTransactionsCollection(),
       where("userId", "==", userId),
+      where("status", "==", "active"),
       orderBy("date", "desc")
     );
     const querySnapshot = await getDocs(q);
@@ -59,8 +116,46 @@ export const getUserTransactions = async (userId: string) => {
     });
     return transactions;
   } catch (error) {
-    console.error("Error getting documents: ", error);
-    throw error;
+    // Fallback if index missing for status active
+    console.warn("Index might be missing, falling back to client filter", error);
+    const qBack = query(
+      getTransactionsCollection(),
+      where("userId", "==", userId),
+      orderBy("date", "desc")
+    );
+    const querySnapshot = await getDocs(qBack);
+    const transactions: Transaction[] = [];
+    querySnapshot.forEach((doc) => {
+      const data = doc.data() as Transaction;
+      if (data.status !== 'deleted') {
+        transactions.push({ id: doc.id, ...data });
+      }
+    });
+    return transactions;
+  }
+};
+
+export const getAuditLogs = async (userId: string) => {
+  if (isDemoMode) {
+    return [...mockAuditLogs];
+  }
+  try {
+    const q = query(getAuditCollection(), where("userId", "==", userId), orderBy("timestamp", "desc"));
+    const querySnapshot = await getDocs(q);
+    const logs: AuditLog[] = [];
+    querySnapshot.forEach((doc) => logs.push({ id: doc.id, ...doc.data() } as AuditLog));
+    return logs;
+  } catch (error) {
+    console.warn("Index missing for audit logs", error);
+    const q2 = query(getAuditCollection(), where("userId", "==", userId));
+    const qs = await getDocs(q2);
+    const logs: AuditLog[] = [];
+    qs.forEach((doc) => logs.push({ id: doc.id, ...doc.data() } as AuditLog));
+    return logs.sort((a, b) => {
+       const d1 = a.timestamp instanceof Timestamp ? a.timestamp.toMillis() : (a.timestamp as Date).getTime();
+       const d2 = b.timestamp instanceof Timestamp ? b.timestamp.toMillis() : (b.timestamp as Date).getTime();
+       return d2 - d1;
+    });
   }
 };
 

@@ -382,7 +382,6 @@ const AddTransaction: React.FC = () => {
               className="form-input" 
               placeholder="Ej. Compra de suministros" 
               rows={3} 
-              required 
             />
           </div>
 
