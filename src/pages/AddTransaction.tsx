@@ -160,33 +160,38 @@ const AddTransaction: React.FC = () => {
       let merchantName = '';
 
       // 1. Intentar extraer nombre (Yappy: "Enviado a" o "Recibido de")
+      // Buscamos la línea siguiente a "Enviado a" o "Recibido de"
       const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
       const targetIndex = lines.findIndex(l => l.toLowerCase().includes('enviado a') || l.toLowerCase().includes('recibido de'));
       if (targetIndex !== -1 && lines.length > targetIndex + 1) {
-        merchantName = lines[targetIndex + 1].replace(/[^a-zA-Z\s]/g, '').trim(); // Limpiar caracteres raros
+        // La siguiente línea suele ser el nombre. Si es muy corta, probamos la siguiente.
+        let possibleName = lines[targetIndex + 1].replace(/[^a-zA-Z\s]/g, '').trim();
+        if (possibleName.length < 3 && lines.length > targetIndex + 2) {
+            possibleName = lines[targetIndex + 2].replace(/[^a-zA-Z\s]/g, '').trim();
+        }
+        if (possibleName.length >= 3) merchantName = possibleName;
       }
 
-      // 2. Extraer monto (Buscar patrones que parezcan dinero: con 2 decimales y/o símbolo $)
-      // Tesseract a veces confunde $ con S o 5.
-      const moneyRegex = /(?:[\$S5])?\s*(\d{1,3}(?:[.,]\d{3})*[.,]\d{2})/g;
+      // 2. Extraer monto (Buscar patrones que parezcan dinero: con 2 decimales explícitos)
+      // Tesseract a veces agrega espacios: "1. 25" o "1 .25".
+      const moneyRegex = /(?:[\$S5])?\s*(\d+)\s*[.,]\s*(\d{2})\b/g;
       let match;
       let possibleAmounts: number[] = [];
       
       while ((match = moneyRegex.exec(text)) !== null) {
-         let valStr = match[1].replace(/[^0-9.,]/g, '');
-         if (valStr.includes(',') && valStr.includes('.')) valStr = valStr.replace(/,/g, '');
-         else if (valStr.includes(',')) valStr = valStr.replace(',', '.');
+         const valStr = match[1] + '.' + match[2];
          const val = parseFloat(valStr);
          if (!isNaN(val) && val > 0 && val < 50000) { 
             possibleAmounts.push(val);
          }
       }
 
-      // Si no encuentra con 2 decimales, busca cualquier número con $ o S adelante
+      // Fallback: Si no encuentra con 2 decimales, busca cualquier número precedido por $ o S
       if (possibleAmounts.length === 0) {
-          const fallbackRegex = /(?:[\$S])\s*(\d{1,3}(?:[.,]\d{3})*)/g;
+          const fallbackRegex = /(?:[\$S])\s*(\d+)(?:\s*[.,]\s*(\d+))?\b/g;
           while ((match = fallbackRegex.exec(text)) !== null) {
-             let valStr = match[1].replace(/[^0-9.,]/g, '');
+             const dec = match[2] ? '.' + match[2] : '';
+             const valStr = match[1] + dec;
              const val = parseFloat(valStr);
              if (!isNaN(val) && val > 0 && val < 50000) { 
                 possibleAmounts.push(val);
@@ -195,7 +200,6 @@ const AddTransaction: React.FC = () => {
       }
 
       if (possibleAmounts.length > 0) {
-         // Si hay varios montos (ej. subtotal y total), solemos querer el mayor
          finalAmount = Math.max(...possibleAmounts);
       }
 
@@ -207,7 +211,8 @@ const AddTransaction: React.FC = () => {
         }));
         setScanResult(merchantName ? '¡Monto y contacto detectados!' : '¡Monto detectado! Verifica los datos.');
       } else {
-        setScanResult('No se detectó un monto claro. Revisa la imagen.');
+        // Mostrar los primeros 100 caracteres del texto extraído para poder hacer debug
+        setScanResult(`No se detectó el monto. Texto leído: ${text.substring(0, 100).replace(/\n/g, ' ')}`);
       }
     } catch (error) {
       console.error("OCR Error", error);
