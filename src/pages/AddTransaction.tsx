@@ -148,11 +148,47 @@ const AddTransaction: React.FC = () => {
     }
   };
 
+  const preprocessImage = async (file: File): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return resolve(URL.createObjectURL(file));
+        
+        ctx.drawImage(img, 0, 0);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+        
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i];
+          const g = data[i+1];
+          const b = data[i+2];
+          const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+          
+          if (gray > 200) {
+            // Lo blanco o muy claro se vuelve negro
+            data[i] = data[i+1] = data[i+2] = 0;
+          } else {
+            // El fondo azul o letras negras se vuelven blanco
+            data[i] = data[i+1] = data[i+2] = 255;
+          }
+        }
+        ctx.putImageData(imageData, 0, 0);
+        resolve(canvas.toDataURL('image/jpeg', 1.0));
+      };
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
   const performOCR = async (imageFile: File) => {
     setIsScanning(true);
     setScanResult('');
     try {
-      const result = await Tesseract.recognize(imageFile, 'spa');
+      const processedImageUrl = await preprocessImage(imageFile);
+      const result = await Tesseract.recognize(processedImageUrl, 'spa');
       const text = result.data.text;
       console.log("Texto extraído:", text); // Para debug en consola
       
