@@ -9,7 +9,7 @@ import { motion } from 'framer-motion';
 import { Camera, Upload, Loader2, CheckCircle2, QrCode, X } from 'lucide-react';
 
 const OMNEX_SUBCATEGORIES = ["Alquiler", "Combustible", "Pago de internet", "Teléfono", "Plataforma digital", "Comida con clientes", "Mantenimiento del vehículo"];
-const HIJOS_SUBCATEGORIES = ["Gastos de fútbol", "Salidas de recreación", "Ropa", "Útiles escolares", "Transporte", "Mensualidad de fútbol de Sebas", "Prácticas de fútbol de Sebas", "Torneos de fútbol de Sebas", "Uniforme de fútbol de Sebas", "Comida en tiempo compartido"];
+const HIJOS_SUBCATEGORIES = ["Lotería", "Comida mía", "Gastos de fútbol", "Salidas de recreación", "Ropa", "Útiles escolares", "Transporte", "Mensualidad de fútbol de Sebas", "Prácticas de fútbol de Sebas", "Torneos de fútbol de Sebas", "Uniforme de fútbol de Sebas", "Comida en tiempo compartido"];
 const INGRESO_SOURCES = ["Plataformas digitales", "Trader Service", "Dr. José", "Auditorias", "Pago de trabajo de Gym", "Otro"];
 
 const AddTransaction: React.FC = () => {
