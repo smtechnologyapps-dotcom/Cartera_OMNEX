@@ -12,6 +12,7 @@ const TransactionsList: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchParams] = useSearchParams();
   const [filterType, setFilterType] = useState(searchParams.get('filter') || 'all');
+  const [searchTerm, setSearchTerm] = useState('');
 
   const [editingTx, setEditingTx] = useState<Transaction | null>(null);
   const [editReason, setEditReason] = useState('');

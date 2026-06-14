@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { getAuditLogs, AuditLog } from '../services/db';
-import { useAuth } from '../context/AuthContext';
+import { getAuditLogs } from '../services/db';
+import type { AuditLog } from '../services/db';
+import { useAuth } from '../contexts/AuthContext';
 import { motion } from 'framer-motion';
 import { ShieldAlert, Clock, Info } from 'lucide-react';
 import { Timestamp } from 'firebase/firestore';
