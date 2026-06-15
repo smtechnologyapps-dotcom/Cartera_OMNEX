@@ -267,11 +267,12 @@ const AddTransaction: React.FC = () => {
   };
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="max-w-2xl mx-auto w-full"
-    >
+    <>
+      <motion.div 
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-2xl mx-auto w-full"
+      >
       <h1 style={{ fontSize: '2rem', marginBottom: '2rem' }}>Nueva Transacción</h1>
       
       <div className="glass-panel" style={{ padding: '2rem' }}>
@@ -420,7 +421,7 @@ const AddTransaction: React.FC = () => {
             {isSubmitting ? 'Guardando...' : 'Guardar Transacción'}
           </button>
         </form>
-      </div>
+      </motion.div>
 
       {/* QR Scanner Modal */}
       {isScanningQRCode && (
@@ -445,6 +446,7 @@ const AddTransaction: React.FC = () => {
           </div>
         </div>
       )}
+      
       {/* Success Modal */}
       {showSuccessModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', zIndex: 1000, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
@@ -477,7 +479,7 @@ const AddTransaction: React.FC = () => {
           </motion.div>
         </div>
       )}
-    </motion.div>
+    </>
   );
 };
 
