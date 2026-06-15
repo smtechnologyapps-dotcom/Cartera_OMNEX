@@ -35,7 +35,7 @@ const Layout: React.FC = () => {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
-          <NavLink to="/" style={({isActive}) => ({
+          <NavLink to="/" className="hover-relief" style={({isActive}) => ({
             display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem 1rem', 
             borderRadius: 'var(--radius-md)', textDecoration: 'none',
             color: isActive ? 'white' : 'var(--color-text-muted)',
@@ -48,7 +48,7 @@ const Layout: React.FC = () => {
             Tablero
           </NavLink>
           
-          <NavLink to="/add" style={({isActive}) => ({
+          <NavLink to="/add" className="hover-relief" style={({isActive}) => ({
             display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem 1rem', 
             borderRadius: 'var(--radius-md)', textDecoration: 'none',
             color: isActive ? 'white' : 'var(--color-text-muted)',
@@ -61,7 +61,7 @@ const Layout: React.FC = () => {
             Nueva Transacción
           </NavLink>
 
-          <NavLink to="/transactions" style={({isActive}) => ({
+          <NavLink to="/transactions" className="hover-relief" style={({isActive}) => ({
             display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem 1rem', 
             borderRadius: 'var(--radius-md)', textDecoration: 'none',
             color: isActive ? 'white' : 'var(--color-text-muted)',
@@ -74,7 +74,7 @@ const Layout: React.FC = () => {
             Historial
           </NavLink>
 
-          <NavLink to="/audit" style={({isActive}) => ({
+          <NavLink to="/audit" className="hover-relief" style={({isActive}) => ({
             display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem 1rem', 
             borderRadius: 'var(--radius-md)', textDecoration: 'none',
             color: isActive ? 'white' : 'var(--color-text-muted)',

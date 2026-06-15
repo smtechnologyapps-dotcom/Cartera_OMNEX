@@ -147,3 +147,13 @@ button {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+
+/* Hover Relief Effect */
+.hover-relief {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-relief:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3), 0 8px 10px -6px rgba(0,0,0,0.2);
+}

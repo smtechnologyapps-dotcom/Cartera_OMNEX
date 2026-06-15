@@ -6,7 +6,7 @@ import type { Transaction } from '../services/db';
 import Tesseract from 'tesseract.js';
 import { Scanner } from '@yudiel/react-qr-scanner';
 import { motion } from 'framer-motion';
-import { Camera, Upload, Loader2, CheckCircle2, QrCode, X } from 'lucide-react';
+import { Camera, Upload, Loader2, CheckCircle2, QrCode, X, PlusCircle } from 'lucide-react';
 
 const OMNEX_SUBCATEGORIES = ["Alquiler", "Combustible", "Pago de internet", "Teléfono", "Plataforma digital", "Comida con clientes", "Mantenimiento del vehículo"];
 const HIJOS_SUBCATEGORIES = ["Lotería", "Comida mía", "Gastos de fútbol", "Salidas de recreación", "Ropa", "Útiles escolares", "Transporte", "Mensualidad de fútbol de Sebas", "Prácticas de fútbol de Sebas", "Torneos de fútbol de Sebas", "Uniforme de fútbol de Sebas", "Comida en tiempo compartido"];
@@ -32,6 +32,24 @@ const AddTransaction: React.FC = () => {
   const [scanResult, setScanResult] = useState<string>('');
   
   const [isScanningQRCode, setIsScanningQRCode] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  const resetForm = () => {
+    setFormData({
+      type: 'gasto',
+      category: 'OMNEX',
+      subCategory: OMNEX_SUBCATEGORIES[0],
+      amount: '',
+      date: new Date().toISOString().split('T')[0],
+      description: '',
+    });
+    setFile(null);
+    setScanResult('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    setShowSuccessModal(false);
+  };
 
   const onScanSuccess = async (decodedText: string) => {
     setIsScanningQRCode(false);
@@ -239,7 +257,7 @@ const AddTransaction: React.FC = () => {
       };
 
       await addTransaction(tx);
-      navigate('/transactions');
+      setShowSuccessModal(true);
     } catch (error) {
       console.error(error);
       alert('Error al guardar la transacción');
@@ -425,6 +443,38 @@ const AddTransaction: React.FC = () => {
             </div>
             <p style={{ textAlign: 'center', marginTop: '1rem', fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>Apunta la cámara al código QR de la factura impresa.</p>
           </div>
+        </div>
+      )}
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', zIndex: 1000, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+          <motion.div 
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            style={{ background: 'var(--color-bg-light)', padding: '2rem', borderRadius: 'var(--radius-lg)', width: '100%', maxWidth: '400px', border: '1px solid rgba(16, 185, 129, 0.3)', textAlign: 'center' }}
+          >
+            <div className="flex justify-center mb-4 text-green-500">
+              <CheckCircle2 size={48} />
+            </div>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.5rem' }}>Transacción Guardada</h3>
+            <p style={{ color: 'var(--color-text-muted)', marginBottom: '1.5rem', fontSize: '0.875rem' }}>
+              Los datos se han guardado exitosamente en tu billetera. ¿Qué deseas hacer ahora?
+            </p>
+            <div className="flex flex-col gap-3">
+              <button 
+                onClick={resetForm}
+                className="btn-primary w-full hover-relief flex items-center justify-center gap-2"
+              >
+                <PlusCircle size={18} /> Agregar Otra
+              </button>
+              <button 
+                onClick={() => navigate('/')}
+                className="w-full bg-white/10 hover:bg-white/20 text-white font-medium py-3 rounded-xl transition-colors hover-relief flex items-center justify-center gap-2"
+              >
+                Ir al Menú Principal
+              </button>
+            </div>
+          </motion.div>
         </div>
       )}
     </motion.div>

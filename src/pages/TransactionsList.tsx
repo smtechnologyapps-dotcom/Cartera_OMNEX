@@ -3,11 +3,12 @@ import { useAuth } from '../contexts/AuthContext';
 import { getUserTransactions, updateTransaction, softDeleteTransaction } from '../services/db';
 import type { Transaction } from '../services/db';
 import { motion } from 'framer-motion';
-import { useSearchParams } from 'react-router-dom';
-import { Search, Filter, ExternalLink, MoreVertical, Edit2, Trash2, X, AlertTriangle } from 'lucide-react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { Search, Filter, ExternalLink, Edit2, Trash2, X, AlertTriangle, ArrowLeft } from 'lucide-react';
 
 const TransactionsList: React.FC = () => {
   const { currentUser } = useAuth();
+  const navigate = useNavigate();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchParams] = useSearchParams();
@@ -20,8 +21,6 @@ const TransactionsList: React.FC = () => {
 
   const [deletingTx, setDeletingTx] = useState<Transaction | null>(null);
   const [deleteReason, setDeleteReason] = useState('');
-  
-  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   useEffect(() => {
     if (currentUser) {
@@ -91,7 +90,17 @@ const TransactionsList: React.FC = () => {
       className="w-full"
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
-        <h1 style={{ fontSize: '2rem' }}>Historial de Transacciones</h1>
+        <div className="flex flex-col gap-2">
+          {searchParams.get('filter') && (
+            <button 
+              onClick={() => navigate('/')} 
+              className="flex items-center gap-2 text-text-muted hover:text-white transition-colors text-sm w-fit hover-relief"
+            >
+              <ArrowLeft size={16} /> Volver al Tablero
+            </button>
+          )}
+          <h1 style={{ fontSize: '2rem', margin: 0 }}>Historial de Transacciones</h1>
+        </div>
         
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
           <div style={{ position: 'relative' }}>
@@ -174,30 +183,23 @@ const TransactionsList: React.FC = () => {
                         <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>N/A</span>
                       )}
                     </td>
-                    <td style={{ padding: '1rem 1.5rem', position: 'relative' }}>
-                      <button 
-                        onClick={() => setOpenMenuId(openMenuId === tx.id! ? null : tx.id!)}
-                        className="p-2 hover:bg-white/10 rounded-full transition-colors"
-                      >
-                        <MoreVertical size={20} className="text-text-muted" />
-                      </button>
-                      
-                      {openMenuId === tx.id && (
-                        <div className="absolute right-8 top-12 bg-card border border-border/50 rounded-lg shadow-xl z-50 overflow-hidden w-40">
-                          <button 
-                            onClick={() => { setEditingTx({...tx}); setOpenMenuId(null); }}
-                            className="w-full flex items-center gap-2 p-3 hover:bg-white/5 text-left transition-colors"
-                          >
-                            <Edit2 size={16} className="text-blue-400" /> Editar
-                          </button>
-                          <button 
-                            onClick={() => { setDeletingTx({...tx}); setOpenMenuId(null); }}
-                            className="w-full flex items-center gap-2 p-3 hover:bg-red-500/20 text-left text-red-400 transition-colors border-t border-border/50"
-                          >
-                            <Trash2 size={16} /> Eliminar
-                          </button>
-                        </div>
-                      )}
+                    <td style={{ padding: '1rem 1.5rem' }}>
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={() => setEditingTx({...tx})}
+                          className="p-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-full transition-colors hover-relief"
+                          title="Editar"
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                        <button 
+                          onClick={() => setDeletingTx({...tx})}
+                          className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-full transition-colors hover-relief"
+                          title="Eliminar"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
