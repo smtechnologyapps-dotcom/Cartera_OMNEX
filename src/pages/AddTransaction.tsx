@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { addTransaction, uploadInvoice } from '../services/db';
@@ -8,19 +8,15 @@ import { Scanner } from '@yudiel/react-qr-scanner';
 import { motion } from 'framer-motion';
 import { Camera, Upload, Loader2, CheckCircle2, QrCode, X, PlusCircle } from 'lucide-react';
 
-const OMNEX_SUBCATEGORIES = ["Alquiler", "Combustible", "Pago de internet", "Teléfono", "Plataforma digital", "Comida con clientes", "Mantenimiento del vehículo"];
-const HIJOS_SUBCATEGORIES = ["Lotería", "Comida mía", "Gastos de fútbol", "Salidas de recreación", "Ropa", "Útiles escolares", "Transporte", "Mensualidad de fútbol de Sebas", "Prácticas de fútbol de Sebas", "Torneos de fútbol de Sebas", "Uniforme de fútbol de Sebas", "Comida en tiempo compartido"];
-const INGRESO_SOURCES = ["Plataformas digitales", "Trader Service", "Dr. José", "Auditorias", "Pago de trabajo de Gym", "Otro"];
-
 const AddTransaction: React.FC = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, userProfile } = useAuth();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
     type: 'gasto' as 'ingreso' | 'gasto',
-    category: 'OMNEX' as 'OMNEX' | 'Personal/Hijos' | 'Ingreso',
-    subCategory: OMNEX_SUBCATEGORIES[0],
+    category: '',
+    subCategory: '',
     amount: '',
     date: new Date().toISOString().split('T')[0],
     description: '',
@@ -34,11 +30,27 @@ const AddTransaction: React.FC = () => {
   const [isScanningQRCode, setIsScanningQRCode] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
+  // Initialize dynamic categories when profile loads or type changes
+  useEffect(() => {
+    if (userProfile) {
+      const availableCats = userProfile.categories.filter(c => c.type === formData.type);
+      const defaultCat = availableCats.length > 0 ? availableCats[0].name : '';
+      const defaultSubCat = availableCats.length > 0 && availableCats[0].subCategories.length > 0 ? availableCats[0].subCategories[0] : '';
+      
+      setFormData(prev => ({
+        ...prev,
+        category: defaultCat,
+        subCategory: defaultSubCat
+      }));
+    }
+  }, [userProfile, formData.type]);
+
   const resetForm = () => {
+    const availableCats = userProfile?.categories.filter(c => c.type === 'gasto') || [];
     setFormData({
       type: 'gasto',
-      category: 'OMNEX',
-      subCategory: OMNEX_SUBCATEGORIES[0],
+      category: availableCats.length > 0 ? availableCats[0].name : '',
+      subCategory: availableCats.length > 0 && availableCats[0].subCategories.length > 0 ? availableCats[0].subCategories[0] : '',
       amount: '',
       date: new Date().toISOString().split('T')[0],
       description: '',
@@ -91,22 +103,14 @@ const AddTransaction: React.FC = () => {
     }
   };
 
-
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     if (name === 'type') {
-      if (value === 'ingreso') {
-        setFormData({ ...formData, type: 'ingreso', category: 'Ingreso', subCategory: INGRESO_SOURCES[0] });
-      } else {
-        setFormData({ ...formData, type: 'gasto', category: 'OMNEX', subCategory: OMNEX_SUBCATEGORIES[0] });
-      }
+      setFormData({ ...formData, type: value as 'ingreso' | 'gasto' }); // useEffect will handle category defaults
     } else if (name === 'category') {
-      const newCat = value as 'OMNEX' | 'Personal/Hijos' | 'Ingreso';
-      let newSub = formData.subCategory;
-      if (newCat === 'OMNEX') newSub = OMNEX_SUBCATEGORIES[0];
-      else if (newCat === 'Personal/Hijos') newSub = HIJOS_SUBCATEGORIES[0];
-      setFormData({ ...formData, category: newCat, subCategory: newSub });
+      const selectedCat = userProfile?.categories.find(c => c.name === value);
+      const defaultSubCat = selectedCat && selectedCat.subCategories.length > 0 ? selectedCat.subCategories[0] : '';
+      setFormData({ ...formData, category: value, subCategory: defaultSubCat });
     } else {
       setFormData({ ...formData, [name]: value });
     }
@@ -141,10 +145,8 @@ const AddTransaction: React.FC = () => {
           const gray = 0.299 * r + 0.587 * g + 0.114 * b;
           
           if (gray > 200) {
-            // Lo blanco o muy claro se vuelve negro
             data[i] = data[i+1] = data[i+2] = 0;
           } else {
-            // El fondo azul o letras negras se vuelven blanco
             data[i] = data[i+1] = data[i+2] = 255;
           }
         }
@@ -162,17 +164,13 @@ const AddTransaction: React.FC = () => {
       const processedImageUrl = await preprocessImage(imageFile);
       const result = await Tesseract.recognize(processedImageUrl, 'spa');
       const text = result.data.text;
-      console.log("Texto extraído:", text); // Para debug en consola
       
       let finalAmount = 0;
       let merchantName = '';
 
-      // 1. Intentar extraer nombre (Yappy: "Enviado a" o "Recibido de")
-      // Buscamos la línea siguiente a "Enviado a" o "Recibido de"
       const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
       const targetIndex = lines.findIndex(l => l.toLowerCase().includes('enviado a') || l.toLowerCase().includes('recibido de'));
       if (targetIndex !== -1 && lines.length > targetIndex + 1) {
-        // La siguiente línea suele ser el nombre. Si es muy corta, probamos la siguiente.
         let possibleName = lines[targetIndex + 1].replace(/[^a-zA-Z\s]/g, '').trim();
         if (possibleName.length < 3 && lines.length > targetIndex + 2) {
             possibleName = lines[targetIndex + 2].replace(/[^a-zA-Z\s]/g, '').trim();
@@ -180,8 +178,6 @@ const AddTransaction: React.FC = () => {
         if (possibleName.length >= 3) merchantName = possibleName;
       }
 
-      // 2. Extraer monto (Buscar patrones que parezcan dinero: con 2 decimales explícitos)
-      // Tesseract a veces agrega espacios: "1. 25" o "1 .25".
       const moneyRegex = /(?:[\$S5])?\s*(\d+)\s*[.,]\s*(\d{2})\b/g;
       let match;
       let possibleAmounts: number[] = [];
@@ -194,7 +190,6 @@ const AddTransaction: React.FC = () => {
          }
       }
 
-      // Fallback: Si no encuentra con 2 decimales, busca cualquier número precedido por $ o S
       if (possibleAmounts.length === 0) {
           const fallbackRegex = /(?:[\$S])\s*(\d+)(?:\s*[.,]\s*(\d+))?\b/g;
           while ((match = fallbackRegex.exec(text)) !== null) {
@@ -219,7 +214,6 @@ const AddTransaction: React.FC = () => {
         }));
         setScanResult(merchantName ? '¡Monto y contacto detectados!' : '¡Monto detectado! Verifica los datos.');
       } else {
-        // Mostrar los primeros 100 caracteres del texto extraído para poder hacer debug
         setScanResult(`No se detectó el monto. Texto leído: ${text.substring(0, 100).replace(/\n/g, ' ')}`);
       }
     } catch (error) {
@@ -242,11 +236,11 @@ const AddTransaction: React.FC = () => {
     try {
       let invoiceUrl = undefined;
       if (file) {
-        invoiceUrl = await uploadInvoice(currentUser.uid, file);
+        invoiceUrl = await uploadInvoice(currentUser.uid || currentUser.id, file);
       }
 
       const tx: Transaction = {
-        userId: currentUser.uid,
+        userId: currentUser.uid || currentUser.id,
         type: formData.type,
         category: formData.category,
         subCategory: formData.subCategory,
@@ -260,11 +254,14 @@ const AddTransaction: React.FC = () => {
       setShowSuccessModal(true);
     } catch (error) {
       console.error(error);
-      alert('Error al guardar la transacción');
+      alert('Error al guardar la transacción. Verifica tu conexión.');
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const currentAvailableCats = userProfile?.categories.filter(c => c.type === formData.type) || [];
+  const selectedCatObj = currentAvailableCats.find(c => c.name === formData.category);
 
   return (
     <>
@@ -287,28 +284,23 @@ const AddTransaction: React.FC = () => {
               </select>
             </div>
             
-            {formData.type === 'gasto' && (
-              <div style={{ flex: 1, minWidth: '150px' }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-muted)' }}>Categoría</label>
-                <select name="category" value={formData.category} onChange={handleInputChange} className="form-input">
-                  <option value="OMNEX">Negocio OMNEX</option>
-                  <option value="Personal/Hijos">Personal / Hijos</option>
-                </select>
-              </div>
-            )}
+            <div style={{ flex: 1, minWidth: '150px' }}>
+              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-muted)' }}>Categoría</label>
+              <select name="category" value={formData.category} onChange={handleInputChange} className="form-input" required>
+                {currentAvailableCats.map(cat => (
+                  <option key={cat.id} value={cat.name}>{cat.name}</option>
+                ))}
+              </select>
+            </div>
 
             <div style={{ flex: 1, minWidth: '150px' }}>
               <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-muted)' }}>
-                {formData.type === 'ingreso' ? 'Fuente de Ingreso' : 'Subcategoría'}
+                Subcategoría
               </label>
               <select name="subCategory" value={formData.subCategory} onChange={handleInputChange} className="form-input">
-                {formData.type === 'ingreso' ? (
-                  INGRESO_SOURCES.map(s => <option key={s} value={s}>{s}</option>)
-                ) : formData.category === 'OMNEX' ? (
-                  OMNEX_SUBCATEGORIES.map(s => <option key={s} value={s}>{s}</option>)
-                ) : (
-                  HIJOS_SUBCATEGORIES.map(s => <option key={s} value={s}>{s}</option>)
-                )}
+                {selectedCatObj?.subCategories.map(sub => (
+                  <option key={sub} value={sub}>{sub}</option>
+                ))}
               </select>
             </div>
           </div>
@@ -414,7 +406,8 @@ const AddTransaction: React.FC = () => {
               justifyContent: 'center', 
               alignItems: 'center', 
               gap: '0.5rem',
-              marginTop: '1rem'
+              marginTop: '1rem',
+              background: userProfile?.themeColor || 'var(--color-primary)'
             }}
           >
             {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : <Upload size={20} />}
@@ -467,6 +460,7 @@ const AddTransaction: React.FC = () => {
               <button 
                 onClick={resetForm}
                 className="btn-primary w-full hover-relief flex items-center justify-center gap-2"
+                style={{ background: userProfile?.themeColor || 'var(--color-primary)' }}
               >
                 <PlusCircle size={18} /> Agregar Otra
               </button>

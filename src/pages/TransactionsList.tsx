@@ -7,7 +7,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Search, Filter, ExternalLink, Edit2, Trash2, X, AlertTriangle, ArrowLeft } from 'lucide-react';
 
 const TransactionsList: React.FC = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, userProfile } = useAuth();
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,7 +31,7 @@ const TransactionsList: React.FC = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      const data = await getUserTransactions(currentUser!.uid);
+      const data = await getUserTransactions(currentUser!.uid || currentUser!.id);
       setTransactions(data);
     } catch (error) {
       console.error(error);
@@ -56,7 +56,7 @@ const TransactionsList: React.FC = () => {
         description: editingTx.description,
         category: editingTx.category,
         subCategory: editingTx.subCategory
-      }, currentUser.uid, editReason);
+      }, currentUser.uid || currentUser.id, editReason);
       setEditingTx(null);
       setEditReason('');
       loadData();
@@ -72,7 +72,7 @@ const TransactionsList: React.FC = () => {
     if (!deletingTx || !deletingTx.id || !currentUser || !deleteReason.trim()) return;
     setIsSubmitting(true);
     try {
-      await softDeleteTransaction(deletingTx.id, currentUser.uid, deleteReason);
+      await softDeleteTransaction(deletingTx.id, currentUser.uid || currentUser.id, deleteReason);
       setDeletingTx(null);
       setDeleteReason('');
       loadData();
@@ -83,13 +83,18 @@ const TransactionsList: React.FC = () => {
     }
   };
 
+  const getCategoryColor = (categoryName: string) => {
+    const cat = userProfile?.categories.find(c => c.name === categoryName);
+    return cat ? cat.color : '#8b5cf6';
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       className="w-full"
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+      <div style={{ display: 'flex', justifyItems: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }} className="justify-between">
         <div className="flex flex-col gap-2">
           {searchParams.get('filter') && (
             <button 
@@ -126,8 +131,9 @@ const TransactionsList: React.FC = () => {
               <option value="all">Todas</option>
               <option value="ingreso">Ingresos</option>
               <option value="gasto">Gastos</option>
-              <option value="OMNEX">OMNEX</option>
-              <option value="Personal/Hijos">Personal</option>
+              {userProfile?.categories.map(c => (
+                <option key={c.id} value={c.name}>{c.name}</option>
+              ))}
             </select>
           </div>
         </div>
@@ -151,7 +157,9 @@ const TransactionsList: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredTransactions.map((tx) => (
+                {filteredTransactions.map((tx) => {
+                  const catColor = getCategoryColor(tx.category);
+                  return (
                   <tr key={tx.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', transition: 'background 0.2s ease' }} className="hover:bg-white/5 relative">
                     <td style={{ padding: '1rem 1.5rem' }}>
                       {tx.date instanceof Date ? tx.date.toLocaleDateString() : tx.date.toDate().toLocaleDateString()}
@@ -163,8 +171,8 @@ const TransactionsList: React.FC = () => {
                           padding: '0.25rem 0.75rem', 
                           borderRadius: '1rem', 
                           fontSize: '0.75rem',
-                          background: tx.category === 'OMNEX' ? 'rgba(139, 92, 246, 0.2)' : tx.category === 'Personal/Hijos' ? 'rgba(236, 72, 153, 0.2)' : 'rgba(16, 185, 129, 0.2)',
-                          color: tx.category === 'OMNEX' ? 'var(--color-accent-omnex)' : tx.category === 'Personal/Hijos' ? 'var(--color-accent-personal)' : 'var(--color-success)'
+                          background: `${catColor}33`,
+                          color: catColor
                         }}>
                           {tx.category}
                         </span>
@@ -176,7 +184,7 @@ const TransactionsList: React.FC = () => {
                     </td>
                     <td style={{ padding: '1rem 1.5rem' }}>
                       {tx.invoiceUrl ? (
-                        <a href={tx.invoiceUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-primary)', textDecoration: 'none' }}>
+                        <a href={tx.invoiceUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: userProfile?.themeColor || 'var(--color-primary)', textDecoration: 'none' }}>
                           <ExternalLink size={16} /> Ver
                         </a>
                       ) : (
@@ -202,7 +210,7 @@ const TransactionsList: React.FC = () => {
                       </div>
                     </td>
                   </tr>
-                ))}
+                )})}
               </tbody>
             </table>
           </div>
@@ -241,6 +249,39 @@ const TransactionsList: React.FC = () => {
                   className="form-input"
                 />
               </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-text-muted mb-1">Categoría</label>
+                  <select 
+                    value={editingTx.category}
+                    onChange={(e) => {
+                      const newCat = e.target.value;
+                      const catObj = userProfile?.categories.find(c => c.name === newCat);
+                      setEditingTx({...editingTx, category: newCat, subCategory: catObj && catObj.subCategories.length > 0 ? catObj.subCategories[0] : ''})
+                    }}
+                    className="form-input"
+                  >
+                    {userProfile?.categories.filter(c => c.type === editingTx.type).map(cat => (
+                      <option key={cat.id} value={cat.name}>{cat.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm text-text-muted mb-1">Subcategoría</label>
+                  <select 
+                    value={editingTx.subCategory || ''}
+                    onChange={(e) => setEditingTx({...editingTx, subCategory: e.target.value})}
+                    className="form-input"
+                  >
+                    <option value="">Ninguna</option>
+                    {userProfile?.categories.find(c => c.name === editingTx.category)?.subCategories.map(sub => (
+                      <option key={sub} value={sub}>{sub}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
               <div>
                 <label className="block text-sm text-text-muted mb-1">Motivo de Edición (Auditoría)</label>
                 <textarea 
@@ -251,7 +292,7 @@ const TransactionsList: React.FC = () => {
                   className="form-input border-blue-500/30 focus:border-blue-500"
                 />
               </div>
-              <button type="submit" disabled={isSubmitting} className="btn-primary w-full mt-4 flex items-center justify-center gap-2">
+              <button type="submit" disabled={isSubmitting} className="btn-primary w-full mt-4 flex items-center justify-center gap-2" style={{ background: userProfile?.themeColor || 'var(--color-primary)' }}>
                 {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
               </button>
             </form>

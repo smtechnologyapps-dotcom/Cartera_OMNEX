@@ -1,12 +1,32 @@
 import { db, storage, isDemoMode } from '../firebase';
-import { collection, addDoc, getDocs, query, where, orderBy, Timestamp } from 'firebase/firestore';
+import { collection, doc, setDoc, getDoc, addDoc, getDocs, query, where, orderBy, Timestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+
+export interface CustomCategory {
+  id: string;
+  name: string;
+  type: 'ingreso' | 'gasto';
+  color: string;
+  subCategories: string[];
+}
+
+export interface UserProfile {
+  userId: string;
+  fullName: string;
+  businessName: string;
+  phone: string;
+  country: string;
+  themeColor: string;
+  monthlyBudget: number;
+  categories: CustomCategory[];
+  createdAt?: Timestamp | Date;
+}
 
 export interface Transaction {
   id?: string;
   userId: string;
   type: 'ingreso' | 'gasto';
-  category: 'OMNEX' | 'Personal/Hijos' | 'Ingreso';
+  category: string; // Changed to string to support dynamic categories
   subCategory?: string;
   amount: number;
   date: Timestamp | Date;
@@ -26,6 +46,8 @@ export interface AuditLog {
   details?: any;
 }
 
+let mockUserProfile: UserProfile | null = null;
+
 let mockTransactions: Transaction[] = [
   { id: '1', userId: 'demo-user-123', type: 'ingreso', category: 'Ingreso', subCategory: 'Plataformas digitales', amount: 5000, date: new Date(Date.now() - 86400000 * 5), description: 'Ventas de la semana', status: 'active' },
   { id: '2', userId: 'demo-user-123', type: 'gasto', category: 'OMNEX', subCategory: 'Plataforma digital', amount: 350, date: new Date(Date.now() - 86400000 * 2), description: 'Suscripción de software', status: 'active' },
@@ -36,6 +58,55 @@ let mockAuditLogs: AuditLog[] = [];
 
 const getTransactionsCollection = () => collection(db, 'transactions');
 const getAuditCollection = () => collection(db, 'audit_logs');
+
+export const getUserProfile = async (userId: string): Promise<UserProfile | null> => {
+  if (isDemoMode) {
+    return mockUserProfile || {
+      userId: 'demo-user-123',
+      fullName: 'Usuario Demo',
+      businessName: 'OMNEX Demo',
+      phone: '',
+      country: '',
+      themeColor: '#8b5cf6',
+      monthlyBudget: 2000,
+      categories: [
+        { id: '1', name: 'OMNEX', type: 'gasto', color: '#8b5cf6', subCategories: ['Plataforma digital', 'Comida con clientes'] },
+        { id: '2', name: 'Personal/Hijos', type: 'gasto', color: '#ec4899', subCategories: ['Útiles escolares', 'Ropa'] },
+        { id: '3', name: 'Ingreso', type: 'ingreso', color: '#10b981', subCategories: ['Ventas', 'Servicios'] }
+      ]
+    };
+  }
+  
+  try {
+    const docRef = doc(db, 'users', userId);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return docSnap.data() as UserProfile;
+    }
+    return null;
+  } catch (error) {
+    console.error("Error getting user profile:", error);
+    return null;
+  }
+};
+
+export const saveUserProfile = async (profile: UserProfile): Promise<void> => {
+  if (isDemoMode) {
+    mockUserProfile = profile;
+    return;
+  }
+  
+  try {
+    const docRef = doc(db, 'users', profile.userId);
+    await setDoc(docRef, {
+      ...profile,
+      updatedAt: new Date()
+    }, { merge: true });
+  } catch (error) {
+    console.error("Error saving user profile:", error);
+    throw error;
+  }
+};
 
 export const logAudit = async (log: AuditLog) => {
   if (isDemoMode) {
