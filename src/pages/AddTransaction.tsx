@@ -421,6 +421,7 @@ const AddTransaction: React.FC = () => {
             {isSubmitting ? 'Guardando...' : 'Guardar Transacción'}
           </button>
         </form>
+      </div>
       </motion.div>
 
       {/* QR Scanner Modal */}

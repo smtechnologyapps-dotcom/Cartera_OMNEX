@@ -240,34 +240,49 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Top 5 Expenses Ranking */}
-      <div className="glass-panel mt-8 p-6">
-        <h3 className="mb-4 font-bold flex items-center gap-2 text-lg">
-          <Award className="text-yellow-500" /> Top 5 Gastos del Mes
+      <div className="glass-panel" style={{ marginTop: '2rem', padding: '1.5rem', overflowX: 'auto' }}>
+        <h3 style={{ marginBottom: '1rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.125rem' }}>
+          <Award color="#eab308" size={20} /> Top 5 Gastos del Mes
         </h3>
         
         {topExpenses.length > 0 ? (
-          <div className="space-y-3">
-            {topExpenses.map((tx, idx) => (
-              <div key={tx.id} className="flex justify-between items-center p-3 bg-white/5 rounded-lg border border-white/5">
-                <div className="flex items-center gap-4">
-                  <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center font-bold text-sm">
-                    #{idx + 1}
-                  </div>
-                  <div>
-                    <p className="font-semibold">{tx.description}</p>
-                    <p className="text-xs text-text-muted">
-                      {tx.category} {tx.subCategory ? `• ${tx.subCategory}` : ''}
-                    </p>
-                  </div>
-                </div>
-                <div className="font-bold text-red-400">
-                  ${tx.amount.toFixed(2)}
-                </div>
-              </div>
-            ))}
-          </div>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '400px' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+                <th style={{ padding: '0.75rem 1rem', width: '50px' }}>#</th>
+                <th style={{ padding: '0.75rem 1rem' }}>Descripción</th>
+                <th style={{ padding: '0.75rem 1rem' }}>Categoría</th>
+                <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Monto</th>
+              </tr>
+            </thead>
+            <tbody>
+              {topExpenses.map((tx, idx) => (
+                <tr key={tx.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', transition: 'background 0.2s ease' }} className="hover:bg-white/5">
+                  <td style={{ padding: '1rem', fontWeight: 'bold', color: 'var(--color-text-muted)' }}>{idx + 1}</td>
+                  <td style={{ padding: '1rem', fontWeight: 500 }}>{tx.description}</td>
+                  <td style={{ padding: '1rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', alignItems: 'flex-start' }}>
+                      <span style={{ 
+                        padding: '0.25rem 0.5rem', 
+                        borderRadius: '1rem', 
+                        fontSize: '0.75rem',
+                        background: tx.category === 'OMNEX' ? 'rgba(139, 92, 246, 0.2)' : 'rgba(236, 72, 153, 0.2)',
+                        color: tx.category === 'OMNEX' ? 'var(--color-accent-omnex)' : 'var(--color-accent-personal)'
+                      }}>
+                        {tx.category}
+                      </span>
+                      {tx.subCategory && <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>{tx.subCategory}</span>}
+                    </div>
+                  </td>
+                  <td style={{ padding: '1rem', fontWeight: 'bold', color: 'var(--color-danger)', textAlign: 'right' }}>
+                    ${tx.amount.toFixed(2)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         ) : (
-          <p className="text-text-muted text-center py-4">Aún no hay gastos registrados este mes.</p>
+          <p style={{ color: 'var(--color-text-muted)', textAlign: 'center', padding: '1rem 0' }}>Aún no hay gastos registrados este mes.</p>
         )}
       </div>
 
