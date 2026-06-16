@@ -47,6 +47,12 @@ export interface AuditLog {
 }
 
 let mockUserProfile: UserProfile | null = null;
+try {
+  const storedProfile = localStorage.getItem('mockUserProfile');
+  if (storedProfile) {
+    mockUserProfile = JSON.parse(storedProfile);
+  }
+} catch (e) {}
 
 let mockTransactions: Transaction[] = [
   { id: '1', userId: 'demo-user-123', type: 'ingreso', category: 'Ingreso', subCategory: 'Plataformas digitales', amount: 5000, date: new Date(Date.now() - 86400000 * 5), description: 'Ventas de la semana', status: 'active' },
@@ -93,6 +99,9 @@ export const getUserProfile = async (userId: string): Promise<UserProfile | null
 export const saveUserProfile = async (profile: UserProfile): Promise<void> => {
   if (isDemoMode) {
     mockUserProfile = profile;
+    try {
+      localStorage.setItem('mockUserProfile', JSON.stringify(profile));
+    } catch (e) {}
     return;
   }
   

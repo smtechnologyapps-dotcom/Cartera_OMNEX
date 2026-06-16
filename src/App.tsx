@@ -11,11 +11,23 @@ import TransactionsList from './pages/TransactionsList';
 import AuditLogs from './pages/AuditLogs';
 
 import Settings from './pages/Settings';
+import { useAuth } from './contexts/AuthContext';
+
+const ThemeApplicator = () => {
+  const { userProfile } = useAuth();
+  React.useEffect(() => {
+    if (userProfile?.themeColor) {
+      document.documentElement.style.setProperty('--color-primary', userProfile.themeColor);
+    }
+  }, [userProfile?.themeColor]);
+  return null;
+};
 
 const App: React.FC = () => {
   return (
     <AuthProvider>
       <Router>
+        <ThemeApplicator />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route element={<ProtectedRoute><Onboarding /></ProtectedRoute>} path="/onboarding" />
