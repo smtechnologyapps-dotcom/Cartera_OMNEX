@@ -22,6 +22,7 @@ const Settings: React.FC = () => {
   // Categories State
   const [categories, setCategories] = useState<CustomCategory[]>(userProfile?.categories || []);
   const [editingCategory, setEditingCategory] = useState<CustomCategory | null>(null);
+  const [editingSubText, setEditingSubText] = useState('');
 
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -63,6 +64,7 @@ const Settings: React.FC = () => {
     };
     setCategories([...categories, newCat]);
     setEditingCategory(newCat);
+    setEditingSubText('');
   };
 
   const deleteCategory = (id: string) => {
@@ -172,7 +174,7 @@ const Settings: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={() => setEditingCategory(cat)} className="p-2 hover:bg-white/10 rounded-lg text-blue-400 transition-colors">
+                  <button onClick={() => { setEditingCategory(cat); setEditingSubText(cat.subCategories.join(', ')); }} className="p-2 hover:bg-white/10 rounded-lg text-blue-400 transition-colors">
                     <Edit2 size={16} />
                   </button>
                   <button onClick={() => deleteCategory(cat.id)} className="p-2 hover:bg-white/10 rounded-lg text-red-400 transition-colors">
@@ -235,15 +237,18 @@ const Settings: React.FC = () => {
               <div>
                 <label className="block text-sm font-medium text-text-muted mb-1">Subcategorías (separadas por coma)</label>
                 <textarea 
-                  value={editingCategory.subCategories.join(', ')} 
-                  onChange={(e) => updateCategory(editingCategory.id, { subCategories: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
+                  value={editingSubText} 
+                  onChange={(e) => setEditingSubText(e.target.value)}
                   className="form-input h-24"
                   placeholder="Ej. Ropa, Comida, Transporte"
                 />
               </div>
 
               <button 
-                onClick={() => setEditingCategory(null)}
+                onClick={() => {
+                  updateCategory(editingCategory.id, { subCategories: editingSubText.split(',').map(s => s.trim()).filter(Boolean) });
+                  setEditingCategory(null);
+                }}
                 className="w-full btn-primary mt-4"
                 style={{ background: formData.themeColor }}
               >
