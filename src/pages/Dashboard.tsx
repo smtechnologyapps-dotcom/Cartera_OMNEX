@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { getUserTransactions } from '../services/db';
 import type { Transaction } from '../services/db';
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, DollarSign, ChevronRight, Award, Clock } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, ChevronRight, Award, Clock, Target } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
@@ -127,34 +127,51 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Budget Section */}
-      <div className="glass-panel mb-8 p-6 relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-2 h-full" style={{ background: budgetColor }}></div>
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
-          <div>
-            <h3 className="text-xl font-bold mb-1">Presupuesto Mensual</h3>
-            <p className="text-text-muted text-sm" style={{ color: budgetPercent >= 90 ? budgetColor : 'var(--color-text-muted)' }}>{budgetMessage}</p>
+      <div className="glass-panel mb-8 p-6 relative overflow-hidden transition-all hover-relief border border-white/5 shadow-lg">
+        <div className="absolute top-0 left-0 w-full h-1" style={{ background: `linear-gradient(90deg, ${budgetColor}, transparent)` }}></div>
+        
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-2xl bg-white/5" style={{ color: budgetColor, boxShadow: `0 8px 32px ${budgetColor}30`, border: `1px solid ${budgetColor}40` }}>
+              <Target size={28} />
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold mb-1 tracking-tight text-white">Presupuesto Mensual</h3>
+              <p className="text-sm font-medium" style={{ color: budgetPercent >= 90 ? budgetColor : 'var(--color-text-muted)' }}>
+                {budgetMessage}
+              </p>
+            </div>
           </div>
-          <div className="text-right">
-            <span className="text-2xl font-bold">${currentMonthExpenses.toFixed(2)}</span>
-            <span className="text-text-muted"> / ${budget.toFixed(2)}</span>
+          
+          <div className="flex flex-col items-end bg-white/5 px-5 py-3 rounded-2xl border border-white/10 shadow-inner">
+            <span className="text-xs text-text-muted font-bold mb-1 uppercase tracking-wider">Gastado / Límite</span>
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-black text-white">${currentMonthExpenses.toFixed(2)}</span>
+              <span className="text-text-muted font-medium text-lg">/ ${budget.toFixed(2)}</span>
+            </div>
           </div>
         </div>
         
-        <div className="w-full bg-bg-dark h-4 rounded-full overflow-hidden mb-2">
-          <motion.div 
-            initial={{ width: 0 }}
-            animate={{ width: `${budgetPercent}%` }}
-            transition={{ duration: 1, ease: "easeOut" }}
-            className="h-full rounded-full"
-            style={{ background: budgetColor }}
-          />
-        </div>
-        <div className="flex justify-between text-xs text-text-muted">
-          <span>0%</span>
-          <span style={{ color: budgetPercent >= 90 ? budgetColor : 'var(--color-text-muted)', fontWeight: budgetPercent >= 90 ? 'bold' : 'normal' }}>
-            {budgetPercent.toFixed(1)}% Consumido
-          </span>
-          <span>100%</span>
+        <div className="relative mt-2">
+          <div className="flex justify-between text-xs font-bold mb-3 uppercase tracking-wider" style={{ color: budgetColor }}>
+            <span>0%</span>
+            <span className="bg-white/10 px-3 py-1 rounded-full">{budgetPercent.toFixed(1)}% Consumido</span>
+            <span>100%</span>
+          </div>
+          <div className="w-full bg-bg-dark h-5 rounded-full overflow-hidden shadow-inner border border-white/5 p-1">
+            <motion.div 
+              initial={{ width: 0 }}
+              animate={{ width: `${budgetPercent}%` }}
+              transition={{ duration: 1.5, ease: "easeOut" }}
+              className="h-full rounded-full relative"
+              style={{ 
+                background: `linear-gradient(90deg, ${budgetColor}80, ${budgetColor})`,
+                boxShadow: `0 0 15px ${budgetColor}60`
+              }}
+            >
+              <div className="absolute inset-0 w-full h-full bg-white/20 animate-[pulse_2s_ease-in-out_infinite] rounded-full"></div>
+            </motion.div>
+          </div>
         </div>
       </div>
 
