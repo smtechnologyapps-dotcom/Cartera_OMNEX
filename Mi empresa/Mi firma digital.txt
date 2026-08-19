@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Diagnóstico ISO 14001 • ECO Services • OMNEX-026-2026</title>
+<style>
+  :root { --omn-dark: #0a1628; --omn-accent: #00c896; --omn-gray: #64748b; --omn-bg: #f8fafc; --danger: #dc2626; --warning: #f59e0b; --success: #16a34a; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; color: var(--omn-dark); line-height: 1.5; background: #e2e8f0; }
+  .page { max-width: 210mm; margin: 0 auto; padding: 28px 24px; background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+  .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--omn-accent); padding-bottom: 16px; margin-bottom: 24px; }
+  .logo-text { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 32px; font-weight: 800; color: var(--omn-dark); letter-spacing: 2px; }
+  .logo-text span { color: var(--omn-accent); }
+  .tagline-text { font-size: 10px; color: var(--omn-gray); letter-spacing: 1.5px; font-weight: 500; margin-top: 2px; }
+  .meta-info { text-align: right; font-size: 11px; }
+  .section { margin: 20px 0; padding: 16px; background: var(--omn-bg); border-left: 4px solid var(--omn-accent); border-radius: 0 6px 6px 0; }
+  .section h2 { margin: 0 0 12px; color: var(--omn-dark); font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .section h3 { margin: 16px 0 8px; color: var(--omn-dark); font-size: 12px; font-weight: 600; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  table { width: 100%; border-collapse: collapse; font-size: 11px; margin: 10px 0; }
+  th { background: var(--omn-dark); color: #fff; padding: 10px 8px; text-align: left; font-weight: 600; font-size: 10px; text-transform: uppercase; }
+  td { border: 1px solid #e2e8f0; padding: 10px 8px; vertical-align: top; font-size: 11px; }
+  .status-ok { color: var(--success); font-weight: 700; }
+  .status-partial { color: var(--warning); font-weight: 700; }
+  .status-no { color: var(--danger); font-weight: 700; }
+  .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; margin: 2px; }
+  .badge-ok { background: #dcfce7; color: #166534; }
+  .badge-warning { background: #fef3c7; color: #92400e; }
+  .badge-danger { background: #fee2e2; color: #991b1b; }
+  .badge-info { background: #dbeafe; color: #1e40af; }
+  .finding { margin: 12px 0; padding: 12px; background: #fff; border-radius: 6px; border-left: 3px solid var(--omn-accent); }
+  .finding.critical { border-left-color: var(--danger); }
+  .finding.warning { border-left-color: var(--warning); }
+  .finding.success { border-left-color: var(--success); }
+  .finding h4 { margin: 0 0 6px; font-size: 12px; font-weight: 600; }
+  .finding p { margin: 4px 0; font-size: 11px; line-height: 1.6; }
+  .footer { background: var(--omn-dark); color: #fff; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; border-radius: 6px; margin-top: 24px; }
+  .footer-logo { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 22px; font-weight: 800; letter-spacing: 1.5px; }
+  .footer-logo span { color: var(--omn-accent); }
+  .footer-tagline { font-size: 8px; color: #94a3b8; letter-spacing: 1px; margin-top: 2px; font-weight: 500; }
+  .footer-meta { text-align: right; font-size: 9px; opacity: 0.85; line-height: 1.6; }
+  .priority-high { background: #fee2e2; border-left-color: var(--danger); }
+  .priority-medium { background: #fef3c7; border-left-color: var(--warning); }
+  .priority-low { background: #dcfce7; border-left-color: var(--success); }
+  .maturity-level { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 9px; font-weight: 700; margin-right: 4px; }
+  .level-1 { background: #dcfce7; color: #166534; border: 1px solid #16a34a; }
+  .level-2 { background: #dbeafe; color: #1e40af; border: 1px solid #3b82f6; }
+  
+  @media print {
+    body { background: #fff; padding: 0; }
+    .page { box-shadow: none; padding: 20px; max-width: 100%; }
+    .section, .finding, table, th, td, .badge, .footer { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    @page { margin: 15mm; size: A4 portrait; }
+  }
+</style>
+</head>
+<body>
+  <div class="page">
+    <!-- Header -->
+    <div class="header">
+      <div>
+        <div class="logo-text">OMN<span>EX</span></div>
+        <div class="tagline-text">AUTOMATIZACIÓN · IA · DIGITAL</div>
+      </div>
+      <div class="meta-info">
+        <div style="font-size:12px; font-weight:700; margin-bottom:4px; color:var(--omn-dark);">INFORME DE DIAGNÓSTICO</div>
+        <div style="font-size:11px; font-weight:600; color:var(--omn-accent);">OMNEX-026-2026</div>
+        <div style="margin-top:8px; color:var(--omn-gray);">Fecha: 7 de mayo de 2026</div>
+        <div style="color:var(--omn-gray);">Proyecto: ISO 14001:2015</div>
+      </div>
+    </div>
+
+    <!-- Client Info -->
+    <div class="section">
+      <h2>📋 INFORMACIÓN DEL PROYECTO</h2>
+      <div class="grid-2">
+        <div>
+          <p style="font-size:11px; margin:4px 0;"><strong>Cliente:</strong> QRM Services / ECO Services</p>
+          <p style="font-size:11px; margin:4px 0;"><strong>Razón Social:</strong> SERVICIOS ECOLOGICOS S.A.</p>
+          <p style="font-size:11px; margin:4px 0;"><strong>Ubicación:</strong> Las Garzas, Pacora, Panamá</p>
+          <p style="font-size:11px; margin:4px 0;"><strong>Actividad:</strong> Gestión de residuos peligrosos, no peligrosos y RAEE</p>
+        </div>
+        <div>
+          <p style="font-size:11px; margin:4px 0;"><strong>Auditora Líder:</strong> Mayanin Hernandez</p>
+          <p style="font-size:11px; margin:4px 0;"><strong>Consultor:</strong> Ing. Omar Gutiérrez</p>
+          <p style="font-size:11px; margin:4px 0;"><strong>Tel:</strong> 6509-1352</p>
+          <p style="font-size:11px; margin:4px 0;"><strong>Email:</strong> smtechnologyapps@gmail.com</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Executive Summary -->
+    <div class="section">
+      <h2>📊 ENFOQUE: MADUREZ PROGRESIVA</h2>
+      <p style="font-size:11px; line-height:1.7; margin:8px 0;">
+        ECO Services cuenta con una <strong>base operativa sólida</strong>. El personal conoce sus procesos y los ejecuta correctamente en campo. 
+        Nuestro rol como consultores (OMNEX) es <strong>estructurar y documentar</strong> esas prácticas según ISO 14001:2015, para que sean auditables, medibles y mejorables.
+      </p>
+      <div class="grid-2">
+        <div style="padding:12px; background:#dcfce7; border-radius:6px; border:1px solid #16a34a;">
+          <p style="font-size:11px; margin:0; font-weight:700;">🟢 NIVEL 1: OPERATIVO (Actual)</p>
+          <p style="font-size:10px; margin:6px 0 0 0;">Prácticas implementadas en campo, conocimiento del personal, permisos vigentes, segregación funcional.</p>
+        </div>
+        <div style="padding:12px; background:#dbeafe; border-radius:6px; border:1px solid #3b82f6;">
+          <p style="font-size:11px; margin:0; font-weight:700;">🔵 NIVEL 2: DOCUMENTADO (Fase 2)</p>
+          <p style="font-size:10px; margin:6px 0 0 0;">Matrices, procedimientos escritos, registros auditables, capacitación formal.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Legal Compliance -->
+    <div class="section">
+      <h2>✅ CUMPLIMIENTO LEGAL [Cláusula 6.1.3]</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:35%;">Requisito Legal</th>
+            <th style="width:25%;">Estado</th>
+            <th style="width:25%;">Documento</th>
+            <th style="width:15%;">Cumple</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Permiso MINSA - Residuos Peligrosos</strong><br><small>Decreto 176/2019, Art. 8(1)</small></td>
+            <td>Vigente</td>
+            <td>Resolución 353 de 2025</td>
+            <td><span class="badge badge-ok">✅ SÍ</span></td>
+          </tr>
+          <tr>
+            <td><strong>Permiso MINSA - Residuos No Peligrosos</strong><br><small>Decreto 176/2019, Art. 8(2)</small></td>
+            <td>Vigente</td>
+            <td>Resolución de 2025</td>
+            <td><span class="badge badge-ok">✅ SÍ</span></td>
+          </tr>
+          <tr>
+            <td><strong>Registro SINEC (MiAmbiente)</strong><br><small>Ley 8/2015 - Eco-circularidad</small></td>
+            <td>Actualizado</td>
+            <td>Res. TVEDA-SINEC-001-2025</td>
+            <td><span class="badge badge-ok">✅ SÍ</span></td>
+          </tr>
+          <tr>
+            <td><strong>Manifiestos de entrega</strong><br><small>Trazabilidad a gestores</small></td>
+            <td>Disponibles</td>
+            <td>STI C-27583-2025 + Factura AAUD</td>
+            <td><span class="badge badge-ok">✅ SÍ</span></td>
+          </tr>
+          <tr>
+            <td><strong>Registros de transporte</strong><br><small>Control entrada/salida</small></td>
+            <td>Implementado</td>
+            <td>Formato "Recepción de Material"</td>
+            <td><span class="badge badge-ok">✅ SÍ</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="font-size:11px; margin:8px 0;"><strong>Conclusión:</strong> <span class="status-ok">✅ CUMPLE</span> - Documentación legal al día y permisos vigentes.</p>
+    </div>
+
+    <!-- Environmental Aspects -->
+    <div class="section">
+      <h2>🌍 ASPECTOS AMBIENTALES [Cláusula 6.1.1-6.1.2]</h2>
+      
+      <div style="margin:8px 0; padding:10px; background:#fff; border-radius:6px; border-left:4px solid var(--success);">
+        <p style="font-size:11px; margin:0;"><span class="maturity-level level-1">NIVEL 1</span> <strong>Identificación Operativa (Actual):</strong></p>
+        <ul style="font-size:11px; margin:4px 0 0 20px; line-height:1.6;">
+          <li>Personal conoce los procesos y sus impactos ambientales.</li>
+          <li>Segregación de materiales implementada en campo (super sacks, zonas designadas).</li>
+          <li>Trazabilidad básica para clientes prioritarios.</li>
+        </ul>
+      </div>
+
+      <div style="margin:8px 0; padding:10px; background:#fff; border-radius:6px; border-left:4px solid #3b82f6;">
+        <p style="font-size:11px; margin:0;"><span class="maturity-level level-2">NIVEL 2</span> <strong>Formalización (Objetivo Fase 2):</strong></p>
+        <ul style="font-size:11px; margin:4px 0 0 20px; line-height:1.6;">
+          <li>Matriz formal de aspectos e impactos (valoración F×S×Legal).</li>
+          <li>Documentación de criterios de significancia.</li>
+          <li>Integración con requisitos legales aplicables.</li>
+        </ul>
+      </div>
+
+      <p style="font-size:11px; margin:8px 0 0 0; font-style:italic; color:var(--omn-gray);">
+        💡 <strong>Valor del Consultor:</strong> Transformar el conocimiento práctico del equipo en una matriz auditada y estandarizada.
+      </p>
+    </div>
+
+    <!-- Operational Controls -->
+    <div class="section">
+      <h2>⚙️ CONTROLES OPERACIONALES [Cláusula 8.1]</h2>
+      <div class="grid-2">
+        <div>
+          <h3 style="color:var(--success); margin-bottom:8px;">✅ FORTALEZAS EXISTENTES</h3>
+          <ul style="font-size:11px; line-height:1.8; margin:0; padding-left:20px;">
+            <li>Segregación de materiales (super sacks)</li>
+            <li>Trazabilidad para clientes prioritarios</li>
+            <li>Piso de concreto en toda la galera</li>
+            <li>Extintores tipo C con sellos vigentes</li>
+            <li>Señalización de EPP en entrada</li>
+            <li>Jaula de seguridad CONAPRED</li>
+            <li>Guía de segregación a clientes</li>
+            <li><strong>Galera techada con extractores pasivos</strong></li>
+          </ul>
+        </div>
+        <div>
+          <h3 style="color:var(--warning); margin-bottom:8px;">🔧 ÁREAS DE MEJORA (Fase 2)</h3>
+          <ul style="font-size:11px; line-height:1.8; margin:0; padding-left:20px;">
+            <li>Contención secundaria (baterías/líquidos)</li>
+            <li>Kit de derrames químicos</li>
+            <li>Sujeción de cilindros de gas</li>
+            <li>Rotación de inventario documentada</li>
+            <li>Barandales en zona de altura</li>
+            <li>Registro de inspección de extintores</li>
+            <li>Procedimientos escritos formales</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Emergency Preparedness -->
+    <div class="section">
+      <h2>🚨 PREPARACIÓN PARA EMERGENCIAS [Cláusula 8.2]</h2>
+      
+      <div style="margin:12px 0; padding:12px; background:#fff; border-radius:6px; border-left:4px solid var(--omn-accent);">
+        <p style="font-size:11px; margin:0;"><span class="maturity-level level-1">NIVEL 1</span> <strong>Base Actual:</strong></p>
+        <ul style="font-size:11px; margin:4px 0 0 20px; line-height:1.6;">
+          <li>Extintores disponibles, con presión adecuada y sellos vigentes.</li>
+          <li>Personal tiene noción básica de riesgos operativos.</li>
+        </ul>
+      </div>
+
+      <div style="margin:12px 0; padding:12px; background:#fff; border-radius:6px; border-left:4px solid #3b82f6;">
+        <p style="font-size:11px; margin:0;"><span class="maturity-level level-2">NIVEL 2</span> <strong>Requisito ISO 14001 (Fase 2):</strong></p>
+        <ul style="font-size:11px; margin:4px 0 0 20px; line-height:1.6;">
+          <li><strong>Adquisición de Kit de Derrames Químicos</strong> (Acción Crítica).</li>
+          <li>Capacitación teórico-práctica en uso de extintores.</li>
+          <li>Señalización de ruta de evacuación y puntos de reunión.</li>
+          <li>Registro de simulacros o inspecciones.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Critical Findings -->
+    <div class="section">
+      <h2>⚠️ HALLAZGOS CRÍTICOS DE LA VISITA</h2>
+      
+      <div class="finding critical">
+        <h4>🔴 HALLAZGO 1: Cilindros de Gas Sin Sujeción (RIESGO CRÍTICO)</h4>
+        <p><strong>Ubicación:</strong> Área de almacenamiento temporal</p>
+        <p><strong>Observación:</strong> Cilindros de oxígeno/acetileno almacenados sin cadena de sujeción, mezclados con extintores y equipos varios.</p>
+        <p><strong>Recomendación:</strong> Implementar área específica para gases comprimidos con cadenas de sujeción, separar físicamente de extintores.</p>
+      </div>
+
+      <div class="finding critical">
+        <h4>🔴 HALLAZGO 2: Sin Kit de Derrames Químicos</h4>
+        <p><strong>Ubicación:</strong> Toda la instalación</p>
+        <p><strong>Observación:</strong> No se encontró kit de derrames de productos químicos en ninguna área de la galera.</p>
+        <p><strong>Recomendación:</strong> Adquirir kit de emergencia con absorbentes, EPP, pala, bolsas y contenedor para residuos peligrosos.</p>
+      </div>
+
+      <div class="finding warning">
+        <h4>🟡 HALLAZGO 3: Baterías Sin Contención Secundaria</h4>
+        <p><strong>Ubicación:</strong> Jaula CONAPRED</p>
+        <p><strong>Observación:</strong> Baterías almacenadas directamente sobre pallet de madera sin bandeja de contención secundaria.</p>
+        <p><strong>Recomendación:</strong> Instalar bandeja de contención que cumpla 110% del volumen total almacenado.</p>
+      </div>
+
+      <div class="finding success">
+        <h4>🟢 FORTALEZA: Infraestructura y Ventilación</h4>
+        <p><strong>Ubicación:</strong> Zona de desensamble de tarjetas</p>
+        <p><strong>Observación:</strong> Galera completamente techada con estructura metálica. Se instalaron extractores de aire pasivos en el techo que reducen temperatura sin consumo eléctrico.</p>
+        <p><strong>Impacto ISO 14001:</strong> Control de condiciones ambientales y reducción de huella energética.</p>
+      </div>
+    </div>
+
+    <!-- Action Plan -->
+    <div class="section">
+      <h2>📋 PLAN DE ACCIÓN (FASE 2)</h2>
+      <p style="font-size:11px; margin-bottom:12px;">Acciones necesarias para pasar del <span class="maturity-level level-1">NIVEL 1</span> al <span class="maturity-level level-2">NIVEL 2</span>.</p>
+      
+      <h3 style="color:var(--danger); margin:12px 0 8px 0;">🔴 ACCIÓN INMEDIATA (Semana 1-2)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:5%;">#</th>
+            <th style="width:50%;">Acción</th>
+            <th style="width:25%;">Responsable</th>
+            <th style="width:20%;">Plazo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="priority-high">
+            <td>1</td>
+            <td><strong>Adquirir kit de derrames de productos químicos</strong><br><small>Absorbentes, EPP, pala, bolsas, contenedor</small></td>
+            <td>Gerencia</td>
+            <td>7 días</td>
+          </tr>
+          <tr class="priority-high">
+            <td>2</td>
+            <td><strong>Instalar bandejas de contención secundaria</strong><br><small>Baterías, cilindros de gas, productos líquidos</small></td>
+            <td>Supervisor</td>
+            <td>7 días</td>
+          </tr>
+          <tr class="priority-high">
+            <td>3</td>
+            <td><strong>Implementar cadena de sujeción para cilindros</strong><br><small>Separar físicamente de extintores</small></td>
+            <td>Supervisor</td>
+            <td>7 días</td>
+          </tr>
+          <tr class="priority-high">
+            <td>4</td>
+            <td><strong>Capacitación en uso de extintores</strong><br><small>Teórico-práctica para todo el personal</small></td>
+            <td>Consultor</td>
+            <td>14 días</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 style="color:#3b82f6; margin:16px 0 8px 0;">📘 DOCUMENTACIÓN Y MATRICES (Fase 2 - Entregables)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:5%;">#</th>
+            <th style="width:50%;">Entregable</th>
+            <th style="width:25%;">Responsable</th>
+            <th style="width:20%;">Plazo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="priority-medium">
+            <td>5</td>
+            <td><strong>Matriz de Aspectos e Impactos</strong><br><small>Valoración: frecuencia × severidad × legal</small></td>
+            <td>Consultor</td>
+            <td>21 días</td>
+          </tr>
+          <tr class="priority-medium">
+            <td>6</td>
+            <td><strong>Matriz de Requisitos Legales</strong><br><small>Actualización normativa Panamá</small></td>
+            <td>Consultor</td>
+            <td>21 días</td>
+          </tr>
+          <tr class="priority-medium">
+            <td>7</td>
+            <td><strong>Procedimientos documentados (4-6)</strong><br><small>F-OPS-002: Trazabilidad<br>F-OPS-003: Cilindros de gas<br>F-OPS-004: Productos químicos</small></td>
+            <td>Consultor</td>
+            <td>28 días</td>
+          </tr>
+          <tr class="priority-medium">
+            <td>8</td>
+            <td><strong>Capacitación en concienciación ISO 14001</strong><br><small>Roles SGA, trazabilidad, mejora continua</small></td>
+            <td>Consultor</td>
+            <td>28 días</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ISO Compliance Summary -->
+    <div class="section">
+      <h2>📊 EVALUACIÓN DE MADUREZ ISO 14001:2015</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:35%;">Cláusula ISO 14001</th>
+            <th style="width:25%;">Nivel Actual</th>
+            <th style="width:40%;">Observación</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>4.1-4.3</strong> Contexto y Alcance</td>
+            <td><span class="badge badge-warning">🟡 Nivel 1</span></td>
+            <td>Requiere documentación formal del SGA</td>
+          </tr>
+          <tr>
+            <td><strong>5.1-5.3</strong> Liderazgo</td>
+            <td><span class="badge badge-warning">🟡 Nivel 1</span></td>
+            <td>Compromiso visible pero sin roles documentados</td>
+          </tr>
+          <tr>
+            <td><strong>6.1.1-6.1.2</strong> Aspectos Ambientales</td>
+            <td><span class="badge badge-warning">🟡 Nivel 1</span></td>
+            <td>Identificados operativamente, pendiente matriz formal</td>
+          </tr>
+          <tr>
+            <td><strong>6.1.3</strong> Requisitos Legales</td>
+            <td><span class="badge badge-ok">✅ Nivel 2</span></td>
+            <td>Permisos MINSA/MiAmbiente vigentes</td>
+          </tr>
+          <tr>
+            <td><strong>6.2-6.3</strong> Objetivos y Planificación</td>
+            <td><span class="badge badge-danger">🔴 Pendiente</span></td>
+            <td>Sin objetivos ambientales documentados</td>
+          </tr>
+          <tr>
+            <td><strong>7.1-7.5</strong> Apoyo y Documentación</td>
+            <td><span class="badge badge-warning">🟡 Nivel 1</span></td>
+            <td>Algunos registros presentes, requieren formalización</td>
+          </tr>
+          <tr>
+            <td><strong>8.1-8.2</strong> Control Operacional y Emergencias</td>
+            <td><span class="badge badge-warning">🟡 Nivel 1</span></td>
+            <td>Controles básicos presentes, requieren kit de derrames y capacitación</td>
+          </tr>
+          <tr>
+            <td><strong>9.1-9.2</strong> Evaluación del Desempeño</td>
+            <td><span class="badge badge-danger">🔴 Pendiente</span></td>
+            <td>Sin monitoreo ni auditorías internas</td>
+          </tr>
+          <tr>
+            <td><strong>10.1-10.3</strong> Mejora Continua</td>
+            <td><span class="badge badge-danger">🔴 Pendiente</span></td>
+            <td>Sin sistema de no conformidades</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Next Steps -->
+    <div class="section">
+      <h2>🔄 PRÓXIMOS PASOS (Según Propuesta OMNEX-026-2026)</h2>
+      
+      <div style="margin:12px 0; padding:12px; background:#dcfce7; border-radius:6px; border-left:4px solid var(--success);">
+        <p style="font-size:11px; margin:0;"><strong>✅ FASE 1 COMPLETADA (Nivel 1):</strong></p>
+        <ul style="font-size:11px; margin:6px 0 0 20px; line-height:1.6;">
+          <li>Revisión de documentos (permisos, registros operativos)</li>
+          <li>Visita presencial (7 de mayo de 2026)</li>
+          <li>Diagnóstico preliminar (este documento)</li>
+        </ul>
+      </div>
+
+      <div style="margin:12px 0; padding:12px; background:#dbeafe; border-radius:6px; border-left:4px solid #3b82f6;">
+        <p style="font-size:11px; margin:0;"><strong>🔵 PENDIENTE - FASE 2 (Matrices y Controles):</strong></p>
+        <ul style="font-size:11px; margin:6px 0 0 20px; line-height:1.6;">
+          <li><strong>Entregables:</strong> Matriz de aspectos/impactos + Matriz legal + 4-6 procedimientos SGA</li>
+          <li><strong>Pago:</strong> B/. 250 (segundo 50% del anticipo)</li>
+          <li><strong>Plazo:</strong> Semanas 2-3 (inicio tras confirmación de pago)</li>
+        </ul>
+      </div>
+
+      <div style="margin:12px 0; padding:12px; background:#f8fafc; border-radius:6px; border-left:4px solid var(--omn-accent);">
+        <p style="font-size:11px; margin:0;"><strong>📅 FASE 3 (Capacitación y Auditoría Interna):</strong></p>
+        <ul style="font-size:11px; margin:6px 0 0 20px; line-height:1.6;">
+          <li>Capacitación básica al personal (1.5h)</li>
+          <li>Planificación y ejecución de auditoría interna</li>
+          <li>Informe de auditoría con plan de acciones correctivas</li>
+          <li>Preparación para auditoría externa (mayo 2026)</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <div>
+        <div class="footer-logo">OMN<span>EX</span></div>
+        <div class="footer-tagline">AUTOMATIZACIÓN · IA · DIGITAL</div>
+      </div>
+      <div class="footer-meta">
+        <div>© 2026 OMNEX. Todos los derechos reservados.</div>
+        <div>🇵🇦 Hecho con orgullo en Panamá | RUC: 8-829-1163 DV 20</div>
+        <div>Consultor: Ing. Omar Gutiérrez | Tel: 6509-1352</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

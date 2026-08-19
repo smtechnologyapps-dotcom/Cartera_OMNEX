@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, PlusCircle, List, LogOut, Wallet, ShieldAlert, Settings as SettingsIcon } from 'lucide-react';
+import { LayoutDashboard, PlusCircle, List, LogOut, Wallet, ShieldAlert, Settings as SettingsIcon, Users, FileText } from 'lucide-react';
 import { logout } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -72,6 +72,32 @@ const Layout: React.FC = () => {
           })}>
             <List size={20} />
             Historial
+          </NavLink>
+
+          <NavLink to="/clients" className="hover-relief" style={({isActive}) => ({
+            display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem 1rem', 
+            borderRadius: 'var(--radius-md)', textDecoration: 'none',
+            color: isActive ? 'white' : 'var(--color-text-muted)',
+            background: isActive ? 'rgba(59, 130, 246, 0.15)' : 'transparent',
+            borderLeft: isActive ? '3px solid var(--color-primary)' : '3px solid transparent',
+            fontWeight: isActive ? 600 : 500,
+            transition: 'all 0.2s ease'
+          })}>
+            <Users size={20} />
+            Clientes
+          </NavLink>
+
+          <NavLink to="/invoices" className="hover-relief" style={({isActive}) => ({
+            display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem 1rem', 
+            borderRadius: 'var(--radius-md)', textDecoration: 'none',
+            color: isActive ? 'white' : 'var(--color-text-muted)',
+            background: isActive ? 'rgba(59, 130, 246, 0.15)' : 'transparent',
+            borderLeft: isActive ? '3px solid var(--color-primary)' : '3px solid transparent',
+            fontWeight: isActive ? 600 : 500,
+            transition: 'all 0.2s ease'
+          })}>
+            <FileText size={20} />
+            Documentos
           </NavLink>
 
           <NavLink to="/audit" className="hover-relief" style={({isActive}) => ({

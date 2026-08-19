@@ -10,6 +10,49 @@ export interface CustomCategory {
   subCategories: string[];
 }
 
+export interface Client {
+  id?: string;
+  userId: string;
+  fechaRegistro: number;
+  email: string;
+  emailSecundario: string;
+  empresa: string;
+  ruc: string;
+  contacto: string;
+  telefono: string;
+  descripcion: string;
+  logo: string;
+  generarPolitica: boolean;
+  sexo: string;
+  nombreApp: string;
+  mensualidad: number;
+  activo: boolean;
+}
+
+export interface InvoiceItem {
+  id: string;
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+}
+
+export interface Invoice {
+  id?: string;
+  userId: string;
+  invoiceNumber: string;
+  clientId: string;
+  clientName: string;
+  date: number;
+  amount: number;
+  items?: InvoiceItem[];
+  status: 'Draft' | 'Emitted' | 'Paid';
+  description: string;
+  pdfUrl?: string;
+  docType: 'Invoice' | 'Quote';
+  terms?: string;
+}
+
 export interface UserProfile {
   userId: string;
   fullName: string;
@@ -61,9 +104,13 @@ let mockTransactions: Transaction[] = [
 ];
 
 let mockAuditLogs: AuditLog[] = [];
+let mockClients: Client[] = [];
+let mockInvoices: Invoice[] = [];
 
 const getTransactionsCollection = () => collection(db, 'transactions');
 const getAuditCollection = () => collection(db, 'audit_logs');
+const getClientsCollection = () => collection(db, 'clients');
+const getInvoicesCollection = () => collection(db, 'invoices');
 
 export const getUserProfile = async (userId: string): Promise<UserProfile | null> => {
   if (isDemoMode) {
@@ -252,5 +299,71 @@ export const uploadInvoice = async (userId: string, file: File): Promise<string>
   } catch (error) {
     console.error("Error uploading file: ", error);
     throw error;
+  }
+};
+
+export const addClient = async (client: Client) => {
+  if (isDemoMode) {
+    const newClient = { ...client, id: Date.now().toString() };
+    mockClients = [newClient, ...mockClients];
+    return newClient.id;
+  }
+  try {
+    const docRef = await addDoc(getClientsCollection(), client);
+    return docRef.id;
+  } catch (error) {
+    console.error("Error adding client: ", error);
+    throw error;
+  }
+};
+
+export const getClients = async (userId: string) => {
+  if (isDemoMode) return [...mockClients.filter(c => c.userId === userId)];
+  try {
+    const q = query(getClientsCollection(), where("userId", "==", userId), orderBy("fechaRegistro", "desc"));
+    const querySnapshot = await getDocs(q);
+    const clients: Client[] = [];
+    querySnapshot.forEach((doc) => clients.push({ id: doc.id, ...doc.data() } as Client));
+    return clients;
+  } catch (error) {
+    console.warn("Index might be missing, falling back for clients", error);
+    const qBack = query(getClientsCollection(), where("userId", "==", userId));
+    const querySnapshot = await getDocs(qBack);
+    const clients: Client[] = [];
+    querySnapshot.forEach((doc) => clients.push({ id: doc.id, ...doc.data() } as Client));
+    return clients.sort((a, b) => b.fechaRegistro - a.fechaRegistro);
+  }
+};
+
+export const addInvoice = async (invoice: Invoice) => {
+  if (isDemoMode) {
+    const newInvoice = { ...invoice, id: Date.now().toString() };
+    mockInvoices = [newInvoice, ...mockInvoices];
+    return newInvoice.id;
+  }
+  try {
+    const docRef = await addDoc(getInvoicesCollection(), invoice);
+    return docRef.id;
+  } catch (error) {
+    console.error("Error adding invoice: ", error);
+    throw error;
+  }
+};
+
+export const getInvoices = async (userId: string) => {
+  if (isDemoMode) return [...mockInvoices.filter(i => i.userId === userId)];
+  try {
+    const q = query(getInvoicesCollection(), where("userId", "==", userId), orderBy("date", "desc"));
+    const querySnapshot = await getDocs(q);
+    const invoices: Invoice[] = [];
+    querySnapshot.forEach((doc) => invoices.push({ id: doc.id, ...doc.data() } as Invoice));
+    return invoices;
+  } catch (error) {
+    console.warn("Index might be missing, falling back for invoices", error);
+    const qBack = query(getInvoicesCollection(), where("userId", "==", userId));
+    const querySnapshot = await getDocs(qBack);
+    const invoices: Invoice[] = [];
+    querySnapshot.forEach((doc) => invoices.push({ id: doc.id, ...doc.data() } as Invoice));
+    return invoices.sort((a, b) => b.date - a.date);
   }
 };

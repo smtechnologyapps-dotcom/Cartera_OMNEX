@@ -1,0 +1,17 @@
+<footer style="background:#f0f4f8;border-top:0.5px solid #dde3ea;padding:20px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <!-- Ícono SVG -->
+    <div>
+      <div style="font-family:'Space Grotesk',Arial,sans-serif;font-size:15px;font-weight:700;color:#0a3d62;letter-spacing:2px;">
+        <span style="color:#00a87a;">OMN</span>EX
+      </div>
+      <div style="font-size:8px;color:#00a87a;letter-spacing:0.2em;margin-top:2px;">
+        AUTOMATIZACIÓN · IA · DIGITAL
+      </div>
+    </div>
+  </div>
+  <div style="text-align:right;">
+    <div style="font-size:10px;color:#0a3d62;opacity:0.5;">© 2026 OMNEX. Todos los derechos reservados.</div>
+    <div style="font-size:9px;color:#0a3d62;opacity:0.45;margin-top:2px;">🇵🇦 Hecho con orgullo en Panamá</div>
+  </div>
+</footer>

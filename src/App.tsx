@@ -11,6 +11,9 @@ import TransactionsList from './pages/TransactionsList';
 import AuditLogs from './pages/AuditLogs';
 
 import Settings from './pages/Settings';
+import ClientsPage from './pages/ClientsPage';
+import InvoicesPage from './pages/InvoicesPage';
+import InvoiceBuilder from './pages/InvoiceBuilder';
 import { useAuth } from './contexts/AuthContext';
 
 const ThemeApplicator = () => {
@@ -38,6 +41,9 @@ const App: React.FC = () => {
             <Route path="/transactions" element={<TransactionsList />} />
             <Route path="/audit" element={<AuditLogs />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/clients" element={<ClientsPage />} />
+            <Route path="/invoices" element={<InvoicesPage />} />
+            <Route path="/invoices/new" element={<InvoiceBuilder />} />
           </Route>
         </Routes>
       </Router>
