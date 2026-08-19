@@ -159,33 +159,33 @@ export default function ClientsPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-400 mb-1">Nombre de la Empresa</label>
-                  <input required name="empresa" type="text" className="w-full bg-black/60 border border-white/10 text-white rounded-xl p-3 focus:outline-none focus:ring-1" style={{ '--tw-ring-color': 'var(--color-primary)' } as any} />
+                  <input required name="empresa" type="text" className="form-input" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-400 mb-1">RUC o Cédula</label>
-                  <input name="ruc" type="text" className="w-full bg-black/60 border border-white/10 text-white rounded-xl p-3 focus:outline-none focus:ring-1" style={{ '--tw-ring-color': 'var(--color-primary)' } as any} />
+                  <input name="ruc" type="text" className="form-input" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-400 mb-1">Nombre Contacto</label>
-                  <input required name="contacto" type="text" className="w-full bg-black/60 border border-white/10 text-white rounded-xl p-3 focus:outline-none focus:ring-1" style={{ '--tw-ring-color': 'var(--color-primary)' } as any} />
+                  <input required name="contacto" type="text" className="form-input" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-400 mb-1">Teléfono</label>
-                  <input required name="telefono" type="text" className="w-full bg-black/60 border border-white/10 text-white rounded-xl p-3 focus:outline-none focus:ring-1" style={{ '--tw-ring-color': 'var(--color-primary)' } as any} />
+                  <input required name="telefono" type="text" className="form-input" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-400 mb-1">Correo Electrónico</label>
-                  <input required name="email" type="email" className="w-full bg-black/60 border border-white/10 text-white rounded-xl p-3 focus:outline-none focus:ring-1" style={{ '--tw-ring-color': 'var(--color-primary)' } as any} />
+                  <input required name="email" type="email" className="form-input" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-400 mb-1">Costo Mensualidad ($)</label>
-                  <input name="mensualidad" type="number" step="0.01" className="w-full bg-black/60 border border-white/10 text-white rounded-xl p-3 focus:outline-none focus:ring-1" style={{ '--tw-ring-color': 'var(--color-primary)' } as any} defaultValue="0" />
+                  <input name="mensualidad" type="number" step="0.01" className="form-input" defaultValue="0" />
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-400 mb-1">Descripción del Proyecto</label>
-                <textarea name="descripcion" rows={3} className="w-full bg-black/60 border border-white/10 text-white rounded-xl p-3 focus:outline-none focus:ring-1" style={{ '--tw-ring-color': 'var(--color-primary)' } as any}></textarea>
+                <textarea name="descripcion" rows={3} className="form-input"></textarea>
               </div>
 
               <div className="flex items-center gap-2">
@@ -195,7 +195,7 @@ export default function ClientsPage() {
 
               <div className="pt-4 flex justify-end gap-3">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-3 rounded-xl border border-white/20 text-white hover:bg-white/10 transition-colors">Cancelar</button>
-                <button type="submit" style={{ backgroundColor: 'var(--color-primary)' }} className="px-6 py-3 rounded-xl text-white font-bold hover:brightness-110 transition-colors">Crear Cliente</button>
+                <button type="submit" className="btn-primary">Crear Cliente</button>
               </div>
             </form>
           </div>
