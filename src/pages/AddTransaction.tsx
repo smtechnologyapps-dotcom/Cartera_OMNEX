@@ -15,6 +15,7 @@ const AddTransaction: React.FC = () => {
 
   const [formData, setFormData] = useState({
     type: 'gasto' as 'ingreso' | 'gasto',
+    scope: 'Empresa' as 'Empresa' | 'Personal',
     category: '',
     subCategory: '',
     amount: '',
@@ -49,6 +50,7 @@ const AddTransaction: React.FC = () => {
     const availableCats = userProfile?.categories.filter(c => c.type === 'gasto') || [];
     setFormData({
       type: 'gasto',
+      scope: 'Empresa',
       category: availableCats.length > 0 ? availableCats[0].name : '',
       subCategory: availableCats.length > 0 && availableCats[0].subCategories.length > 0 ? availableCats[0].subCategories[0] : '',
       amount: '',
@@ -242,6 +244,7 @@ const AddTransaction: React.FC = () => {
       const tx: Transaction = {
         userId: currentUser.uid || currentUser.id,
         type: formData.type,
+        scope: formData.scope,
         category: formData.category,
         subCategory: formData.subCategory,
         amount: Number(formData.amount),
@@ -281,6 +284,14 @@ const AddTransaction: React.FC = () => {
               <select name="type" value={formData.type} onChange={handleInputChange} className="form-input">
                 <option value="gasto">Gasto</option>
                 <option value="ingreso">Ingreso</option>
+              </select>
+            </div>
+
+            <div style={{ flex: 1, minWidth: '150px' }}>
+              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-muted)' }}>Cuenta</label>
+              <select name="scope" value={formData.scope} onChange={handleInputChange} className="form-input">
+                <option value="Empresa">🏢 Empresa</option>
+                <option value="Personal">👤 Personal</option>
               </select>
             </div>
             

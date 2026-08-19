@@ -69,6 +69,7 @@ export interface Transaction {
   id?: string;
   userId: string;
   type: 'ingreso' | 'gasto';
+  scope?: 'Empresa' | 'Personal'; // Agregado para separar finanzas
   category: string; // Changed to string to support dynamic categories
   subCategory?: string;
   amount: number;
