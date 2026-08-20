@@ -19,15 +19,13 @@ export default function InvoiceBuilder() {
   ]);
 
   const [docType, setDocType] = useState<'Invoice' | 'Quote'>('Invoice');
-  const [businessLine, setBusinessLine] = useState<'consultoria' | 'auditoria' | 'app' | 'web' | 'automatizacion'>('consultoria');
+  const [businessLine, setBusinessLine] = useState<'mensualidad' | 'desarrollo' | 'consultoria'>('mensualidad');
   
-  const termsConsultoria = `💳 FORMA DE PAGO: 50% de anticipo para iniciar el servicio • 50% contra entrega del informe o certificación final. (PAGO ÚNICO)\n🏦 DATOS BANCARIOS: Omar Gutiérrez • Banco General • Cuenta Ahorro: 04-25-97-603245-9\n📝 NOTA: Los gastos de viáticos fuera de la provincia aplican cargos adicionales pre-aprobados.`;
-  const termsAuditoria = `💳 FORMA DE PAGO: 50% de anticipo para agendar auditoría (ISO 9001/14001/45001) • 50% contra entrega del reporte de hallazgos. (PAGO ÚNICO)\n🏦 DATOS BANCARIOS: Omar Gutiérrez • Banco General • Cuenta Ahorro: 04-25-97-603245-9`;
-  const termsApp = `💳 FORMA DE PAGO: 50% anticipo al inicio y aprobación • 50% restante previo a la publicación. (PAGO ÚNICO POR DESARROLLO)\n⏱️ MANTENIMIENTO: Se facturará una mensualidad recurrente por hosting y soporte posterior a la entrega.\n🏦 DATOS BANCARIOS: Omar Gutiérrez • Banco General • Cuenta Ahorro: 04-25-97-603245-9`;
-  const termsWeb = `💳 FORMA DE PAGO: 50% anticipo al inicio y aprobación • 50% restante previo a la entrega final. (PAGO ÚNICO POR DESARROLLO)\n⏱️ HOSTING: Renovación anual de dominio y hosting (recurrente).\n🏦 DATOS BANCARIOS: Omar Gutiérrez • Banco General • Cuenta Ahorro: 04-25-97-603245-9`;
-  const termsAutomatizacion = `💳 FORMA DE PAGO: 50% de anticipo al diseño del flujo • 50% al despliegue en producción. (PAGO ÚNICO POR DESARROLLO)\n⏱️ PLATAFORMAS: El cliente asume costos recurrentes de licencias de terceros (ej. Make, n8n, Supabase).\n🏦 DATOS BANCARIOS: Omar Gutiérrez • Banco General • Cuenta Ahorro: 04-25-97-603245-9`;
+  const termsMensualidad = `⏱️ POLÍTICA DE PAGO: Los pagos correspondientes a mensualidades de aplicaciones se deberán realizar dentro de los primeros 5 días del mes en curso, de lo contrario conllevará desactivación del app hasta recibido el pago correspondiente.\n💳 DATOS BANCARIOS: Transferencia bancaria a nombre de: Omar Gutierrez, Banco General, Cuenta ahorro: 04-25-97-603245-9`;
+  const termsDesarrollo = `💳 FORMA DE PAGO: 50% anticipo al inicio y aprobación • 50% restante previo a la entrega final.\n🏦 DATOS BANCARIOS: Omar Gutiérrez • Banco General • Cuenta Ahorro: 04-25-97-603245-9\n🛡️ GARANTÍA: Acompañamiento técnico de 30 días post-entrega para ajustes menores.`;
+  const termsConsultoria = `💳 FORMA DE PAGO: 50% de anticipo para iniciar el servicio • 50% contra entrega del informe o certificación final.\n🏦 DATOS BANCARIOS: Omar Gutiérrez • Banco General • Cuenta Ahorro: 04-25-97-603245-9\n📝 NOTA: Los gastos de viáticos fuera de la provincia aplican cargos adicionales pre-aprobados.`;
   
-  const [terms, setTerms] = useState(termsConsultoria);
+  const [terms, setTerms] = useState(termsMensualidad);
 
   useEffect(() => {
     if (userProfile?.userId) {
@@ -36,11 +34,9 @@ export default function InvoiceBuilder() {
   }, [userProfile?.userId]);
 
   useEffect(() => {
+    if (businessLine === 'mensualidad') setTerms(termsMensualidad);
+    if (businessLine === 'desarrollo') setTerms(termsDesarrollo);
     if (businessLine === 'consultoria') setTerms(termsConsultoria);
-    if (businessLine === 'auditoria') setTerms(termsAuditoria);
-    if (businessLine === 'app') setTerms(termsApp);
-    if (businessLine === 'web') setTerms(termsWeb);
-    if (businessLine === 'automatizacion') setTerms(termsAutomatizacion);
   }, [businessLine]);
 
   const invoiceRef = useRef<HTMLDivElement>(null);
@@ -185,11 +181,9 @@ export default function InvoiceBuilder() {
               value={businessLine}
               onChange={(e) => setBusinessLine(e.target.value as any)}
             >
-              <option value="consultoria">Consultoría Ambiental</option>
-              <option value="auditoria">Auditoría Tri-normas ISO</option>
-              <option value="app">Creación de App</option>
-              <option value="web">Creación de Web</option>
-              <option value="automatizacion">Automatizaciones</option>
+              <option value="mensualidad">Apps / SaaS (Recurrente)</option>
+              <option value="desarrollo">Desarrollo Web / Diseño (Pago Único)</option>
+              <option value="consultoria">Consultorías / Auditorías ISO</option>
             </select>
           </div>
 
