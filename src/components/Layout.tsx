@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { PlusCircle, ArrowLeftRight, LogOut, ShieldAlert, Settings as SettingsIcon, Users, FileText, Home } from 'lucide-react';
+import { PlusCircle, ArrowLeftRight, LogOut, ShieldAlert, Settings as SettingsIcon, Users, FileText, Home, Radar } from 'lucide-react';
 import { logout } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -21,8 +21,9 @@ const Layout: React.FC = () => {
 
   const navItems = [
     { name: 'Inicio', path: '/', icon: Home },
-    { name: 'Nueva', path: '/add', icon: PlusCircle },
+    { name: 'Radar Espía', path: '/radar', icon: Radar },
     { name: 'Caja', path: '/transactions', icon: ArrowLeftRight },
+    { name: 'Nueva', path: '/add', icon: PlusCircle },
     { name: 'Clientes', path: '/clients', icon: Users },
     { name: 'Documentos', path: '/invoices', icon: FileText },
     { name: 'Auditoría', path: '/audit', icon: ShieldAlert },

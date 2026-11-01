@@ -14,6 +14,7 @@ import Settings from './pages/Settings';
 import ClientsPage from './pages/ClientsPage';
 import InvoicesPage from './pages/InvoicesPage';
 import InvoiceBuilder from './pages/InvoiceBuilder';
+import MarketRadar from './pages/MarketRadar';
 import { useAuth } from './contexts/AuthContext';
 
 const ThemeApplicator = () => {
@@ -44,6 +45,7 @@ const App: React.FC = () => {
             <Route path="/clients" element={<ClientsPage />} />
             <Route path="/invoices" element={<InvoicesPage />} />
             <Route path="/invoices/new" element={<InvoiceBuilder />} />
+            <Route path="/radar" element={<MarketRadar />} />
           </Route>
         </Routes>
       </Router>
